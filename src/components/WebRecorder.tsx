@@ -27,6 +27,7 @@ export default function WebRecorder({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
+  const mimeTypeRef = useRef<string>('video/webm');
 
   const timeLimitMs = timeLimit * 60 * 1000;
 
@@ -57,19 +58,45 @@ export default function WebRecorder({
 
       streamRef.current = stream;
 
+      // Find supported mimeType
+      const mimeTypes = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4',
+      ];
+
+      let selectedMimeType = '';
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
+      }
+
+      if (!selectedMimeType) {
+        throw new Error('Aucun format video supporte par ce navigateur');
+      }
+
+      console.log('Using mimeType:', selectedMimeType);
+      mimeTypeRef.current = selectedMimeType;
+
       // Create MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9',
+        mimeType: selectedMimeType,
       });
 
       mediaRecorder.ondataavailable = (event) => {
+        console.log('Data available:', event.data.size, 'bytes');
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        console.log('Recording stopped, chunks:', chunksRef.current.length);
+        const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
+        console.log('Blob created:', blob.size, 'bytes');
         setRecordedBlob(blob);
         setStatus('preview');
 
@@ -86,8 +113,14 @@ export default function WebRecorder({
         }
       };
 
+      mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event);
+        setError('Erreur lors de l\'enregistrement');
+      };
+
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start(1000); // Collect data every second
+      console.log('MediaRecorder started, state:', mediaRecorder.state);
 
       startTimeRef.current = Date.now();
       setStatus('recording');
