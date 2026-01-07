@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     const actionsJson = formData.get('actions') as string;
     const challengeId = formData.get('challenge_id') as string;
     const duration = formData.get('duration') as string;
+    const bubbleUrl = formData.get('bubble_url') as string;
 
     if (!challengeId) {
       return NextResponse.json(
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
         video_url: publicUrl,
         actions_json: parsedActions,
         duration: duration ? parseInt(duration) : null,
+        bubble_url: bubbleUrl || null,
         status: 'pending',
       })
       .select()
