@@ -42,6 +42,16 @@ export default function WebRecorder({
     };
   }, []);
 
+  // Set video preview when blob is ready and status is preview
+  useEffect(() => {
+    if (status === 'preview' && recordedBlob && videoPreviewRef.current) {
+      console.log('Setting video preview source...');
+      const url = URL.createObjectURL(recordedBlob);
+      videoPreviewRef.current.src = url;
+      console.log('Video preview URL set:', url);
+    }
+  }, [status, recordedBlob]);
+
   const startRecording = async () => {
     console.log('=== startRecording called ===');
 
@@ -110,11 +120,6 @@ export default function WebRecorder({
         console.log('Blob created:', blob.size, 'bytes');
         setRecordedBlob(blob);
         setStatus('preview');
-
-        // Set video preview
-        if (videoPreviewRef.current) {
-          videoPreviewRef.current.src = URL.createObjectURL(blob);
-        }
       };
 
       // Handle stream end (user stops sharing)
