@@ -32,6 +32,10 @@ export default function WebRecorder({
   const timeLimitMs = timeLimit * 60 * 1000;
 
   useEffect(() => {
+    console.log('=== WebRecorder mounted ===');
+    console.log('challengeId:', challengeId);
+    console.log('timeLimit:', timeLimit);
+
     return () => {
       stopRecording();
       if (timerRef.current) clearInterval(timerRef.current);
@@ -39,15 +43,20 @@ export default function WebRecorder({
   }, []);
 
   const startRecording = async () => {
+    console.log('=== startRecording called ===');
+
     if (!bubbleUrl.trim()) {
+      console.log('No bubble URL provided');
       setError('Veuillez entrer l\'URL de votre application Bubble');
       return;
     }
 
+    console.log('Bubble URL:', bubbleUrl);
     setError('');
     chunksRef.current = [];
 
     try {
+      console.log('Requesting screen capture...');
       // Request screen capture
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
@@ -56,6 +65,8 @@ export default function WebRecorder({
         audio: true,
       });
 
+      console.log('Got stream:', stream);
+      console.log('Video tracks:', stream.getVideoTracks().length);
       streamRef.current = stream;
 
       // Find supported mimeType
