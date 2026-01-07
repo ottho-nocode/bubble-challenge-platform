@@ -92,12 +92,12 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#4a90d9] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-b from-[#4a90d9] to-[#001354] rounded-lg flex items-center justify-center">
               <span className="text-white text-xl font-bold">B</span>
             </div>
             <div>
-              <span className="text-[#0f172b] font-semibold text-sm block leading-tight">Bubble</span>
-              <span className="text-[#0f172b] font-semibold text-sm block leading-tight">Challenge</span>
+              <span className="text-[#101828] font-semibold text-sm block leading-tight">Bubble</span>
+              <span className="text-[#101828] font-semibold text-sm block leading-tight">Challenge</span>
             </div>
           </Link>
         </div>
@@ -112,10 +112,10 @@ export default function DashboardLayout({
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-[14px] text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-[#4a90d9] text-white'
-                        : 'text-[#64748b] hover:bg-[#f1f5f9]'
+                        ? 'bg-black text-white'
+                        : 'text-[#6a7282] hover:bg-[#f1f5f9]'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -140,7 +140,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 bg-[#f8fafc]">
+      <main className="flex-1 bg-[#f8f9fc]">
         {children}
       </main>
     </div>
