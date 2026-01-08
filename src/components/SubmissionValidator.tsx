@@ -179,10 +179,7 @@ export default function SubmissionValidator({
               Validation...
             </>
           ) : (
-            <>
-              <CheckCircle size={20} weight="fill" />
-              Valider la soumission
-            </>
+            'Valider'
           )}
         </button>
       </div>
