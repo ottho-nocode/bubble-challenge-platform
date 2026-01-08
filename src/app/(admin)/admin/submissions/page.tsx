@@ -181,16 +181,12 @@ export default function AdminSubmissionsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {submission.video_url && (
-                      <a
-                        href={submission.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#4a90d9] hover:underline text-sm"
-                      >
-                        Voir video
-                      </a>
-                    )}
+                    <a
+                      href={`/admin/submissions/${submission.id}`}
+                      className="text-[#4a90d9] hover:underline text-sm font-medium"
+                    >
+                      Voir details
+                    </a>
                   </td>
                 </tr>
               );
