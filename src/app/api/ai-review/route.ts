@@ -53,6 +53,10 @@ async function compareActions(
     studentScreenshots
   });
 
+  // Log first few actions for debugging
+  console.log('Reference actions (first 3):', JSON.stringify(referenceActions.slice(0, 3), null, 2));
+  console.log('Student actions (first 3):', JSON.stringify(studentActions.slice(0, 3), null, 2));
+
   const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer la soumission d'un élève en comparant ses actions avec la solution de référence.
 
 DÉFI: ${challengeTitle}
@@ -95,9 +99,13 @@ IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans au
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
+    console.log('Sending prompt to Gemini (length:', prompt.length, 'chars)');
+
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+
+    console.log('Gemini raw response:', text.substring(0, 500));
 
     // Extract JSON from response (handle potential markdown code blocks)
     let jsonStr = text;
