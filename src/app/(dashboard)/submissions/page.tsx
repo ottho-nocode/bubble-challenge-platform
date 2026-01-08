@@ -11,10 +11,28 @@ const statusColors = {
   reviewed: 'bg-green-100 text-green-700',
 };
 
-export default async function SubmissionsPage() {
+const ITEMS_PER_PAGE = 10;
+
+export default async function SubmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || '1', 10));
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('submissions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user?.id);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
   const { data: submissions } = await supabase
     .from('submissions')
@@ -36,7 +54,8 @@ export default async function SubmissionsPage() {
       )
     `)
     .eq('user_id', user?.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
 
   return (
     <div className="p-8">
@@ -188,6 +207,58 @@ export default async function SubmissionsPage() {
             >
               Voir les defis
             </Link>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-8 bg-white rounded-xl p-4 shadow-sm">
+            <p className="text-sm text-[#6a7282]">
+              Page {currentPage} sur {totalPages} ({totalCount} soumissions)
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link
+                  href={`/submissions?page=${currentPage - 1}`}
+                  className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-sm font-medium hover:bg-[#e5e7eb] transition-colors"
+                >
+                  Precedent
+                </Link>
+              )}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <Link
+                    key={pageNum}
+                    href={`/submissions?page=${pageNum}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      pageNum === currentPage
+                        ? 'bg-[#001354] text-white'
+                        : 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]'
+                    }`}
+                  >
+                    {pageNum}
+                  </Link>
+                );
+              })}
+              {currentPage < totalPages && (
+                <Link
+                  href={`/submissions?page=${currentPage + 1}`}
+                  className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-sm font-medium hover:bg-[#e5e7eb] transition-colors"
+                >
+                  Suivant
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>
