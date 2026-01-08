@@ -33,24 +33,38 @@ export default function SubmissionValidator({
   // Poll for submission data (video might still be processing)
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    let stopped = false;
 
     const fetchSubmission = async () => {
+      if (stopped) return;
+
       try {
+        console.log('Fetching submission:', submissionId);
         const response = await fetch(`/api/submissions/${submissionId}`);
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+
+        console.log('Submission response:', response.status, data);
+
+        if (response.ok && data.submission) {
           setSubmission(data.submission);
+          setError(null);
 
           // Stop polling if video is ready
           if (data.submission?.mux_playback_id) {
             clearInterval(interval);
+            stopped = true;
           }
         } else {
-          setError('Soumission introuvable');
+          console.error('Submission fetch error:', data);
+          setError(data.error || 'Soumission introuvable');
           clearInterval(interval);
+          stopped = true;
         }
       } catch (err) {
         console.error('Error fetching submission:', err);
+        setError('Erreur de connexion au serveur');
+        clearInterval(interval);
+        stopped = true;
       }
       setLoading(false);
     };
@@ -59,7 +73,10 @@ export default function SubmissionValidator({
     // Poll every 3 seconds while video is processing
     interval = setInterval(fetchSubmission, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      stopped = true;
+    };
   }, [submissionId]);
 
   const handleValidate = async () => {
@@ -69,13 +86,16 @@ export default function SubmissionValidator({
         method: 'POST',
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         router.push('/submissions');
       } else {
-        const data = await response.json();
+        console.error('Validation error:', data);
         setError(data.error || 'Erreur lors de la validation');
       }
     } catch (err) {
+      console.error('Validation connection error:', err);
       setError('Erreur de connexion');
     }
     setValidating(false);

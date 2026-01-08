@@ -7,22 +7,35 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    console.log('Fetching submission:', id);
+
     const supabase = await createClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      console.log('Auth error:', authError);
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 });
     }
 
+    console.log('User:', user.id);
+
+    // First fetch without user_id filter to see what exists
     const { data: submission, error } = await supabase
       .from('submissions')
-      .select('id, mux_playback_id, mux_asset_id, status, created_at, duration, challenge_id')
+      .select('id, mux_playback_id, mux_asset_id, status, created_at, duration, challenge_id, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
       .single();
 
+    console.log('Submission fetch result:', { submission, error });
+
     if (error || !submission) {
-      return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 });
+      return NextResponse.json({ error: 'Soumission introuvable (id: ' + id + ')' }, { status: 404 });
+    }
+
+    // Check ownership
+    if (submission.user_id !== user.id) {
+      console.log('Ownership mismatch:', { submissionUserId: submission.user_id, currentUserId: user.id });
+      return NextResponse.json({ error: 'Cette soumission ne vous appartient pas' }, { status: 403 });
     }
 
     return NextResponse.json({ submission });
