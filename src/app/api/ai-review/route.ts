@@ -14,15 +14,45 @@ interface ReviewResult {
   comment: string;
 }
 
+// Extract actions array from new format (handles both old and new format)
+function extractActions(data: unknown): unknown[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data; // Old format: direct array
+  if (typeof data === 'object' && 'actions' in (data as Record<string, unknown>)) {
+    return (data as Record<string, unknown>).actions as unknown[] || [];
+  }
+  return [];
+}
+
+// Get screenshot count for context
+function getScreenshotCount(data: unknown): number {
+  if (!data || typeof data !== 'object') return 0;
+  const screenshots = (data as Record<string, unknown>).screenshots;
+  return Array.isArray(screenshots) ? screenshots.length : 0;
+}
+
 async function compareActions(
-  referenceActions: unknown,
-  studentActions: unknown,
+  referenceData: unknown,
+  studentData: unknown,
   challengeTitle: string,
   challengeDescription: string,
   criteriaDesign: string,
   criteriaFunctionality: string,
   criteriaCompletion: string
 ): Promise<ReviewResult> {
+  // Extract just the actions (not screenshots - too large)
+  const referenceActions = extractActions(referenceData);
+  const studentActions = extractActions(studentData);
+  const refScreenshots = getScreenshotCount(referenceData);
+  const studentScreenshots = getScreenshotCount(studentData);
+
+  console.log('AI Review - Comparing:', {
+    referenceActionsCount: referenceActions.length,
+    studentActionsCount: studentActions.length,
+    refScreenshots,
+    studentScreenshots
+  });
+
   const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer la soumission d'un élève en comparant ses actions avec la solution de référence.
 
 DÉFI: ${challengeTitle}
@@ -33,6 +63,10 @@ CRITÈRES D'ÉVALUATION:
 2. Fonctionnalités (0-5): ${criteriaFunctionality}
 3. Réalisation (0-5): ${criteriaCompletion}
 
+STATISTIQUES:
+- Référence: ${referenceActions.length} actions, ${refScreenshots} captures d'écran
+- Élève: ${studentActions.length} actions, ${studentScreenshots} captures d'écran
+
 ACTIONS DE RÉFÉRENCE (solution attendue):
 ${JSON.stringify(referenceActions, null, 2)}
 
@@ -40,10 +74,11 @@ ACTIONS DE L'ÉLÈVE (soumission à évaluer):
 ${JSON.stringify(studentActions, null, 2)}
 
 Analyse les deux séquences d'actions et évalue:
-- L'élève a-t-il effectué les mêmes étapes que la référence ?
-- L'ordre des actions est-il respecté ?
-- Y a-t-il des actions manquantes ou en trop ?
-- Les valeurs saisies (inputs) sont-elles correctes ?
+- L'élève a-t-il effectué les mêmes types d'actions que la référence (clics, saisies, navigation) ?
+- L'ordre général des actions est-il cohérent ?
+- Y a-t-il des actions essentielles manquantes ?
+- Les valeurs saisies (inputs) sont-elles correctes ou similaires ?
+- Le nombre d'actions est-il comparable à la référence ?
 
 Fournis:
 1. Un score de 0 à 5 pour chaque critère (0 = non réalisé, 5 = parfait)
