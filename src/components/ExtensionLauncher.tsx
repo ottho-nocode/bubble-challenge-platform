@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Record, Download, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Record, Download, CheckCircle, XCircle, Link as LinkIcon } from '@phosphor-icons/react';
 
 // Declare chrome type for TypeScript
 declare global {
@@ -34,6 +34,7 @@ export default function ExtensionLauncher({
   const [extensionStatus, setExtensionStatus] = useState<ExtensionStatus>('checking');
   const [isPreparing, setIsPreparing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [bubbleUrl, setBubbleUrl] = useState('');
 
   // Check if extension is installed
   useEffect(() => {
@@ -93,6 +94,7 @@ export default function ExtensionLauncher({
           challengeId,
           challengeTitle,
           returnUrl,
+          bubbleUrl,
         },
       });
 
@@ -111,10 +113,10 @@ export default function ExtensionLauncher({
 
   if (extensionStatus === 'checking') {
     return (
-      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+      <div className="bg-[#f9fafb] rounded-[16px] p-5">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#6d28d9]"></div>
-          <span className="text-gray-600">Verification de l'extension...</span>
+          <span className="text-[#6a7282]">Verification de l&apos;extension...</span>
         </div>
       </div>
     );
@@ -122,70 +124,98 @@ export default function ExtensionLauncher({
 
   if (extensionStatus === 'not_installed') {
     return (
-      <div className="bg-amber-50 rounded-xl p-6 border border-amber-200">
-        <div className="flex items-start gap-3">
-          <XCircle size={24} className="text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-amber-800 mb-2">
-              Extension Chrome requise
-            </h3>
-            <p className="text-amber-700 text-sm mb-4">
-              Pour enregistrer votre travail, vous devez installer l'extension Bubble Recorder.
-            </p>
-            <div className="flex gap-3">
-              <a
-                href="https://github.com/ottho-nocode/bubble-recorder-plugin"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
-              >
-                <Download size={18} />
-                Installer l'extension
-              </a>
-              <button
-                onClick={checkExtension}
-                className="inline-flex items-center gap-2 bg-white text-amber-700 px-4 py-2 rounded-lg text-sm font-medium border border-amber-300 hover:bg-amber-50 transition-colors"
-              >
-                Reverifier
-              </button>
+      <div className="space-y-4">
+        {/* Extension not installed box */}
+        <div className="bg-[#fef3c7] rounded-[16px] p-5">
+          <div className="flex items-start gap-3">
+            <XCircle size={20} weight="fill" className="text-[#d97706] flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-[#92400e] text-sm">
+                Extension requise
+              </h4>
+              <p className="text-[#a16207] text-sm mt-1">
+                Installez l&apos;extension Bubble Recorder pour enregistrer votre travail.
+              </p>
             </div>
           </div>
         </div>
+
+        {/* Install button */}
+        <a
+          href="https://github.com/ottho-nocode/bubble-recorder-plugin"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-[#d97706] text-white py-3 px-4 rounded-full font-medium hover:bg-[#b45309] transition-colors"
+        >
+          <Download size={18} weight="bold" />
+          Installer l&apos;extension
+        </a>
+
+        {/* Recheck button */}
+        <button
+          onClick={checkExtension}
+          className="w-full text-[#6a7282] text-sm hover:text-[#101828] transition-colors"
+        >
+          Reverifier l&apos;installation
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="bg-green-50 rounded-xl p-6 border border-green-200">
-      <div className="flex items-start gap-3">
-        <CheckCircle size={24} className="text-green-600 flex-shrink-0 mt-0.5" />
-        <div className="flex-1">
-          <h3 className="font-semibold text-green-800 mb-2">
-            Extension installee
-          </h3>
-          <p className="text-green-700 text-sm mb-4">
-            L'extension Bubble Recorder est prete. Cliquez sur le bouton ci-dessous pour preparer l'enregistrement.
-          </p>
-
-          {message && (
-            <div className="bg-white rounded-lg p-4 border border-green-200 mb-4">
-              <p className="text-green-800 text-sm font-medium">{message}</p>
-              <p className="text-green-600 text-xs mt-2">
-                L'extension ouvrira la page de vos soumissions une fois l'enregistrement termine.
-              </p>
-            </div>
-          )}
-
-          <button
-            onClick={handleLaunchRecording}
-            disabled={isPreparing}
-            className="inline-flex items-center gap-2 bg-[#6d28d9] text-white px-5 py-3 rounded-xl font-medium hover:bg-[#5b21b6] disabled:opacity-50 transition-colors"
-          >
-            <Record size={20} weight="fill" />
-            {isPreparing ? 'Preparation...' : 'Lancer l\'enregistrement'}
-          </button>
+    <div className="space-y-4">
+      {/* Extension installed box */}
+      <div className="bg-[#d1fae5] rounded-[16px] p-5">
+        <div className="flex items-start gap-3">
+          <CheckCircle size={20} weight="fill" className="text-[#059669] flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-[#059669] text-sm">
+              Extension installee
+            </h4>
+            <p className="text-[#047857] text-sm mt-1">
+              L&apos;extension Bubble Recorder est prete. Cliquez sur le bouton ci-dessous pour preparer l&apos;enregistrement.
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Bubble URL Input */}
+      <div>
+        <label htmlFor="bubble-url" className="block text-sm font-medium text-[#374151] mb-2">
+          URL de votre application Bubble
+        </label>
+        <div className="relative">
+          <LinkIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+          <input
+            type="url"
+            id="bubble-url"
+            value={bubbleUrl}
+            onChange={(e) => setBubbleUrl(e.target.value)}
+            placeholder="https://votre-app.bubbleapps.io/version-test"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border border-[#e5e7eb] bg-white text-[#101828] placeholder-[#9ca3af] focus:ring-2 focus:ring-[#6d28d9] focus:border-transparent outline-none text-sm"
+          />
+        </div>
+        <p className="text-xs text-[#6a7282] mt-2">
+          Partagez votre app en mode &quot;Everyone can edit&quot; dans les parametres Bubble.
+        </p>
+      </div>
+
+      {/* Message */}
+      {message && (
+        <div className="bg-[#faf5ff] rounded-xl p-4 border border-[#e9d5ff]">
+          <p className="text-[#6d28d9] text-sm font-medium">{message}</p>
+        </div>
+      )}
+
+      {/* Launch button */}
+      <button
+        onClick={handleLaunchRecording}
+        disabled={isPreparing || !bubbleUrl}
+        className="flex items-center justify-center gap-2 w-full bg-[#6d28d9] text-white py-3 px-4 rounded-full font-medium hover:bg-[#5b21b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <span className="w-2 h-2 rounded-full bg-white"></span>
+        {isPreparing ? 'Preparation...' : 'Lancer l\'enregistrement'}
+      </button>
     </div>
   );
 }
