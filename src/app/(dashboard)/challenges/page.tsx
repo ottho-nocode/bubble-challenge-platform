@@ -54,69 +54,68 @@ export default async function ChallengesPage() {
       {/* Challenges List */}
       <div className="space-y-4">
         {challenges?.map((challenge) => (
-          <div key={challenge.id} className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] flex overflow-hidden">
-            {/* Content */}
-            <div className="flex-1 p-6">
-              {/* Title and Badge */}
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-xl font-semibold text-[#101828]">
-                  {challenge.title}
-                </h2>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[challenge.difficulty as keyof typeof difficultyColors]}`}>
-                  {difficultyLabels[challenge.difficulty as keyof typeof difficultyLabels]}
-                </span>
-              </div>
-
-              {/* Description */}
-              <p className="text-[#6a7282] text-sm mb-4 max-w-2xl">
-                {challenge.description}
-              </p>
-
-              {/* Meta info */}
-              <div className="flex items-center gap-6 mb-4">
-                <div className="flex items-center gap-2 text-sm text-[#6a7282]">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>{challenge.time_limit} min</span>
+          <div key={challenge.id} className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {/* Title and Badge */}
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-xl font-semibold text-[#101828]">
+                    {challenge.title}
+                  </h2>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[challenge.difficulty as keyof typeof difficultyColors]}`}>
+                    {difficultyLabels[challenge.difficulty as keyof typeof difficultyLabels]}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[#6a7282]">
-                  <svg className="w-4 h-4 text-[#f0b100]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd"/>
-                  </svg>
-                  <span>{challenge.points_base} pts</span>
+
+                {/* Description */}
+                <p className="text-[#6a7282] text-sm mb-4 max-w-2xl">
+                  {challenge.description}
+                </p>
+
+                {/* Meta info */}
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-[#6a7282]">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>{challenge.time_limit} min</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#6a7282]">
+                    <svg className="w-4 h-4 text-[#f0b100]" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd"/>
+                    </svg>
+                    <span>{challenge.points_base} pts</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {challenge.criteria_design && (
+                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
+                      Design propre
+                    </span>
+                  )}
+                  {challenge.criteria_functionality && (
+                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
+                      Fonctionnalites
+                    </span>
+                  )}
+                  {challenge.criteria_completion && (
+                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
+                      Realisation complete
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2">
-                {challenge.criteria_design && (
-                  <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                    Design propre
-                  </span>
-                )}
-                {challenge.criteria_functionality && (
-                  <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                    Fonctionnalites
-                  </span>
-                )}
-                {challenge.criteria_completion && (
-                  <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                    Realisation complete
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* CTA Button Zone */}
-            <div className="bg-[#f9fafb] px-6 flex items-center border-l border-[#e5e7eb]">
+              {/* CTA Button */}
               <Link
                 href={`/challenges/${challenge.id}`}
-                className="flex items-center gap-2 bg-[#001354] text-white px-5 py-3 rounded-lg font-medium hover:bg-[#001354]/90 transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 bg-[#001354] text-white px-5 py-3 rounded-xl font-medium hover:bg-[#001354]/90 transition-colors shrink-0 ml-6"
               >
                 Commencer
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7-7 7"/>
                 </svg>
               </Link>
             </div>
