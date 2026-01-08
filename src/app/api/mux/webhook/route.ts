@@ -67,12 +67,17 @@ export async function POST(request: NextRequest) {
         const assetId = asset.id;
         const duration = asset.duration; // in seconds
 
+        // Get the upload ID from the asset's source (the upload that created this asset)
+        const sourceUploadId = asset.upload_id;
+
         console.log('Video ready:', {
           assetId,
           playbackId,
           duration,
           uploadType: upload_type,
           challengeId: challenge_id,
+          userId: user_id,
+          sourceUploadId,
         });
 
         if (upload_type === 'reference') {
@@ -93,20 +98,39 @@ export async function POST(request: NextRequest) {
           }
         } else {
           // Create or update submission with video
-          console.log('Looking for existing submission:', { user_id, challenge_id });
+          console.log('Looking for existing submission:', { user_id, challenge_id, sourceUploadId });
 
-          // First check if there's a pending submission for this user/challenge (with or without mux_asset_id)
-          const { data: existingSubmission, error: searchError } = await supabase
-            .from('submissions')
-            .select('id, mux_asset_id')
-            .eq('user_id', user_id)
-            .eq('challenge_id', challenge_id)
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
+          // First try to find by mux_upload_id if available
+          let existingSubmission = null;
+          let searchError = null;
 
-          console.log('Submission search result:', { existingSubmission, searchError });
+          if (sourceUploadId) {
+            const result = await supabase
+              .from('submissions')
+              .select('id, mux_asset_id')
+              .eq('mux_upload_id', sourceUploadId)
+              .eq('status', 'pending')
+              .single();
+            existingSubmission = result.data;
+            searchError = result.error;
+            console.log('Search by mux_upload_id result:', { existingSubmission, searchError });
+          }
+
+          // Fallback: search by user_id + challenge_id
+          if (!existingSubmission) {
+            const result = await supabase
+              .from('submissions')
+              .select('id, mux_asset_id')
+              .eq('user_id', user_id)
+              .eq('challenge_id', challenge_id)
+              .eq('status', 'pending')
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+            existingSubmission = result.data;
+            searchError = result.error;
+            console.log('Search by user_id+challenge_id result:', { existingSubmission, searchError });
+          }
 
           if (existingSubmission) {
             // Update existing submission with video data

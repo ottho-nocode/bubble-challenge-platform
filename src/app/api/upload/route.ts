@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
       screenshots,
       metadata,
       duration,
-      bubble_url: bubbleUrl
+      bubble_url: bubbleUrl,
+      mux_upload_id: muxUploadId
     } = body;
 
     if (!challengeId) {
@@ -68,7 +69,8 @@ export async function POST(request: NextRequest) {
       challengeId,
       actionsCount: actions?.length || 0,
       screenshotsCount: screenshots?.length || 0,
-      duration
+      duration,
+      muxUploadId
     });
 
     // Build submission data with actions and screenshots
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
       insertError = error;
     } else {
       // Create new submission record (webhook will update with video later)
-      console.log('Creating new submission (no webhook submission found)');
+      console.log('Creating new submission (no webhook submission found), mux_upload_id:', muxUploadId);
       const { data: inserted, error } = await supabase
         .from('submissions')
         .insert({
@@ -133,6 +135,7 @@ export async function POST(request: NextRequest) {
           duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
           bubble_url: bubbleUrl || null,
           status: 'pending',
+          mux_upload_id: muxUploadId || null,
         })
         .select()
         .single();
