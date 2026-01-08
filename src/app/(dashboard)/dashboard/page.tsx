@@ -103,40 +103,30 @@ export default async function DashboardPage() {
         <div className="col-span-2 space-y-6">
           {/* Recommended Challenge */}
           {recommendedChallenge && (
-            <div className="bg-gradient-to-br from-[#001354] to-[#4a90d9] rounded-2xl p-8 text-white relative overflow-hidden">
-              <div className="absolute top-4 right-4 opacity-20">
-                <svg className="w-48 h-48" viewBox="0 0 200 200" fill="none">
-                  <path d="M100 10L120 80L190 80L135 125L155 195L100 150L45 195L65 125L10 80L80 80L100 10Z" fill="white"/>
-                </svg>
-              </div>
-              <div className="relative z-10">
-                <span className="inline-flex items-center gap-2 bg-[#f0b100] text-[#101828] text-xs font-medium px-3 py-1 rounded-full mb-4">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            <div className="bg-gradient-to-br from-[#001354] to-[#4a90d9] rounded-2xl p-8 text-white">
+              <span className="inline-flex items-center gap-2 bg-[#f0b100] text-[#101828] text-xs font-medium px-3 py-1 rounded-full mb-4">
+                Defi recommande
+              </span>
+              <h2 className="text-2xl font-bold mb-3">{recommendedChallenge.title}</h2>
+              <p className="text-white/80 mb-6 max-w-lg">
+                {recommendedChallenge.description}
+              </p>
+              <div className="flex gap-3">
+                <Link
+                  href={`/challenges/${recommendedChallenge.id}`}
+                  className="inline-flex items-center gap-2 bg-white text-[#001354] px-5 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Defi recommande
-                </span>
-                <h2 className="text-2xl font-bold mb-3">{recommendedChallenge.title}</h2>
-                <p className="text-white/80 mb-6 max-w-lg">
-                  {recommendedChallenge.description}
-                </p>
-                <div className="flex gap-3">
-                  <Link
-                    href={`/challenges/${recommendedChallenge.id}`}
-                    className="inline-flex items-center gap-2 bg-white text-[#001354] px-5 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"/>
-                    </svg>
-                    Commencer le defi
-                  </Link>
-                  <Link
-                    href="/challenges"
-                    className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-3 rounded-lg font-medium hover:bg-white/20 transition-colors border border-white/20"
-                  >
-                    Voir tous les defis
-                  </Link>
-                </div>
+                  Commencer le defi
+                </Link>
+                <Link
+                  href="/challenges"
+                  className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-3 rounded-lg font-medium hover:bg-white/20 transition-colors border border-white/20"
+                >
+                  Voir tous les defis
+                </Link>
               </div>
             </div>
           )}

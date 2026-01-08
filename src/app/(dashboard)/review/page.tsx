@@ -83,7 +83,7 @@ export default async function ReviewPage() {
               <div className="flex flex-col gap-2 ml-4">
                 <Link
                   href={`/review/${submission.id}`}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#001354] text-white rounded-xl text-sm font-medium hover:bg-[#001354]/90 text-center flex items-center justify-center"
                 >
                   Corriger
                 </Link>
