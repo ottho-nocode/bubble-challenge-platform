@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import DeleteSubmissionButton from '@/components/DeleteSubmissionButton';
 
 const statusLabels = {
   pending: 'En attente',
@@ -182,6 +183,10 @@ export default async function SubmissionsPage({
                       Voir le feedback
                     </a>
                   )}
+                  <DeleteSubmissionButton
+                    submissionId={submission.id}
+                    status={submission.status}
+                  />
                 </div>
               </div>
             </div>
