@@ -51,23 +51,60 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    console.log('DELETE submission request:', id);
+
     const supabase = await createClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      console.log('DELETE auth error:', authError);
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 });
     }
 
-    // Only allow deleting pending submissions
-    const { error } = await supabase
+    console.log('DELETE user:', user.id);
+
+    // First, verify the submission exists and belongs to the user
+    const { data: submission, error: fetchError } = await supabase
+      .from('submissions')
+      .select('id, user_id, status')
+      .eq('id', id)
+      .single();
+
+    console.log('DELETE fetch result:', { submission, fetchError });
+
+    if (fetchError || !submission) {
+      return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 });
+    }
+
+    if (submission.user_id !== user.id) {
+      return NextResponse.json({ error: 'Cette soumission ne vous appartient pas' }, { status: 403 });
+    }
+
+    if (submission.status !== 'pending') {
+      return NextResponse.json({ error: 'Seules les soumissions en attente peuvent etre supprimees' }, { status: 400 });
+    }
+
+    // Delete associated reviews first (if any)
+    const { error: reviewDeleteError } = await supabase
+      .from('reviews')
+      .delete()
+      .eq('submission_id', id);
+
+    if (reviewDeleteError) {
+      console.log('Error deleting reviews:', reviewDeleteError);
+    }
+
+    // Now delete the submission
+    const { error: deleteError } = await supabase
       .from('submissions')
       .delete()
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .eq('status', 'pending');
+      .eq('id', id);
 
-    if (error) {
-      return NextResponse.json({ error: 'Impossible de supprimer cette soumission' }, { status: 400 });
+    console.log('DELETE result:', { deleteError });
+
+    if (deleteError) {
+      console.error('Delete error:', deleteError);
+      return NextResponse.json({ error: 'Erreur lors de la suppression: ' + deleteError.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });

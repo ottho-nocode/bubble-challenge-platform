@@ -22,14 +22,19 @@ export default function DeleteSubmissionButton({ submissionId, status }: DeleteS
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
+      console.log('Deleting submission:', submissionId);
       const response = await fetch(`/api/submissions/${submissionId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
-      if (response.ok) {
+      console.log('Delete response status:', response.status);
+      const data = await response.json();
+      console.log('Delete response data:', data);
+
+      if (response.ok && data.success) {
         router.refresh();
       } else {
-        const data = await response.json();
         alert(data.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
