@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 interface ReviewResult {
   score_design: number;
@@ -34,13 +32,13 @@ CRITÈRES D'ÉVALUATION:
 2. Fonctionnalités (0-5): ${criteriaFunctionality}
 3. Réalisation (0-5): ${criteriaCompletion}
 
-URL de la vidéo: ${videoUrl}
+URL de la vidéo de la soumission: ${videoUrl}
 
 Analyse cette soumission et fournis:
 1. Un score de 0 à 5 pour chaque critère (0 = non réalisé, 5 = parfait)
 2. Un commentaire constructif et bienveillant en français (2-3 phrases max)
 
-Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
+IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans aucun texte avant ou après:
 {
   "score_design": <number 0-5>,
   "score_functionality": <number 0-5>,
@@ -49,39 +47,36 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
 }`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'Tu es un correcteur expert et bienveillant pour une plateforme d\'apprentissage. Tu réponds uniquement en JSON valide.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    // Extract JSON from response (handle potential markdown code blocks)
+    let jsonStr = text;
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    } else {
+      // Try to find JSON object directly
+      const objectMatch = text.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        jsonStr = objectMatch[0];
+      }
     }
 
-    const result = JSON.parse(content) as ReviewResult;
+    const reviewResult = JSON.parse(jsonStr) as ReviewResult;
 
     // Validate and clamp scores
     return {
-      score_design: Math.max(0, Math.min(5, Math.round(result.score_design))),
-      score_functionality: Math.max(0, Math.min(5, Math.round(result.score_functionality))),
-      score_completion: Math.max(0, Math.min(5, Math.round(result.score_completion))),
-      comment: result.comment || 'Évaluation automatique par IA.',
+      score_design: Math.max(0, Math.min(5, Math.round(reviewResult.score_design))),
+      score_functionality: Math.max(0, Math.min(5, Math.round(reviewResult.score_functionality))),
+      score_completion: Math.max(0, Math.min(5, Math.round(reviewResult.score_completion))),
+      comment: reviewResult.comment || 'Évaluation automatique par IA.',
     };
   } catch (error) {
-    console.error('OpenAI analysis error:', error);
+    console.error('Gemini analysis error:', error);
     // Return default scores if AI fails
     return {
       score_design: 3,
@@ -167,12 +162,12 @@ export async function POST(request: NextRequest) {
       submission.challenges.criteria_completion
     );
 
-    // Create AI review (using a special AI reviewer ID or null)
+    // Create AI review
     const { data: review, error: insertError } = await supabase
       .from('reviews')
       .insert({
         submission_id: submission_id,
-        reviewer_id: submission.user_id, // Self-review for AI (or you could use a dedicated AI user)
+        reviewer_id: submission.user_id,
         score_design: reviewResult.score_design,
         score_functionality: reviewResult.score_functionality,
         score_completion: reviewResult.score_completion,
