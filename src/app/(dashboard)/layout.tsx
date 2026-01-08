@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
   SquaresFour,
@@ -9,7 +10,8 @@ import {
   Monitor,
   CheckSquare,
   ChartBar,
-  SignOut
+  SignOut,
+  GearSix
 } from '@phosphor-icons/react';
 
 const navItems = [
@@ -27,6 +29,23 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+        setIsAdmin(profile?.is_admin || false);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -76,8 +95,17 @@ export default function DashboardLayout({
           </ul>
         </nav>
 
-        {/* Logout */}
-        <div className="p-4 border-t border-[#e2e8f0]">
+        {/* Admin Link + Logout */}
+        <div className="p-4 border-t border-[#e2e8f0] space-y-1">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="w-full flex items-center gap-3 px-4 py-3 text-[#6a7282] hover:bg-[#f1f5f9] rounded-lg text-sm font-medium transition-colors"
+            >
+              <GearSix size={20} />
+              <span>Administration</span>
+            </Link>
+          )}
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 text-[#ef4444] hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
