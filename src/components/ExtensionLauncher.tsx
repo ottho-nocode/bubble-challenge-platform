@@ -145,7 +145,7 @@ export default function ExtensionLauncher({
           href="https://github.com/ottho-nocode/bubble-recorder-plugin"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#d97706] text-white py-3 px-4 rounded-full font-medium hover:bg-[#b45309] transition-colors"
+          className="flex items-center justify-center gap-2 w-full bg-[#d97706] text-white py-3 px-4 rounded-[9px] font-medium hover:bg-[#b45309] transition-colors"
         >
           <Download size={18} weight="bold" />
           Installer l&apos;extension
@@ -211,7 +211,7 @@ export default function ExtensionLauncher({
       <button
         onClick={handleLaunchRecording}
         disabled={isPreparing || !bubbleUrl}
-        className="flex items-center justify-center gap-2 w-full bg-[#6d28d9] text-white py-3 px-4 rounded-full font-medium hover:bg-[#5b21b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center justify-center gap-2 w-full bg-[#6d28d9] text-white py-3 px-4 rounded-[9px] font-medium hover:bg-[#5b21b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <span className="w-2 h-2 rounded-full bg-white"></span>
         {isPreparing ? 'Preparation...' : 'Lancer l\'enregistrement'}
