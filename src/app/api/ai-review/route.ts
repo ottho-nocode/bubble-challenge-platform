@@ -14,15 +14,16 @@ interface ReviewResult {
   comment: string;
 }
 
-async function analyzeSubmission(
-  videoUrl: string,
+async function compareActions(
+  referenceActions: unknown,
+  studentActions: unknown,
   challengeTitle: string,
   challengeDescription: string,
   criteriaDesign: string,
   criteriaFunctionality: string,
   criteriaCompletion: string
 ): Promise<ReviewResult> {
-  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer une soumission vidéo d'un élève.
+  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer la soumission d'un élève en comparant ses actions avec la solution de référence.
 
 DÉFI: ${challengeTitle}
 DESCRIPTION: ${challengeDescription}
@@ -32,11 +33,21 @@ CRITÈRES D'ÉVALUATION:
 2. Fonctionnalités (0-5): ${criteriaFunctionality}
 3. Réalisation (0-5): ${criteriaCompletion}
 
-URL de la vidéo de la soumission: ${videoUrl}
+ACTIONS DE RÉFÉRENCE (solution attendue):
+${JSON.stringify(referenceActions, null, 2)}
 
-Analyse cette soumission et fournis:
+ACTIONS DE L'ÉLÈVE (soumission à évaluer):
+${JSON.stringify(studentActions, null, 2)}
+
+Analyse les deux séquences d'actions et évalue:
+- L'élève a-t-il effectué les mêmes étapes que la référence ?
+- L'ordre des actions est-il respecté ?
+- Y a-t-il des actions manquantes ou en trop ?
+- Les valeurs saisies (inputs) sont-elles correctes ?
+
+Fournis:
 1. Un score de 0 à 5 pour chaque critère (0 = non réalisé, 5 = parfait)
-2. Un commentaire constructif et bienveillant en français (2-3 phrases max)
+2. Un commentaire constructif et bienveillant en français (2-3 phrases max) expliquant ce qui a été bien fait et ce qui peut être amélioré
 
 IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans aucun texte avant ou après:
 {
@@ -47,7 +58,7 @@ IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans au
 }`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -117,13 +128,15 @@ export async function POST(request: NextRequest) {
           criteria_design,
           criteria_functionality,
           criteria_completion,
-          ai_correction_enabled
+          ai_correction_enabled,
+          reference_actions_json
         )
       `)
       .eq('id', submission_id)
       .single();
 
     if (fetchError || !submission) {
+      console.error('Fetch submission error:', fetchError);
       return NextResponse.json(
         { error: 'Soumission introuvable' },
         { status: 404 }
@@ -134,6 +147,22 @@ export async function POST(request: NextRequest) {
     if (!submission.challenges?.ai_correction_enabled) {
       return NextResponse.json(
         { error: 'La correction IA n\'est pas activée pour ce défi' },
+        { status: 400 }
+      );
+    }
+
+    // Check if reference actions exist
+    if (!submission.challenges?.reference_actions_json) {
+      return NextResponse.json(
+        { error: 'Aucune solution de référence n\'a été enregistrée pour ce défi. L\'admin doit d\'abord enregistrer la solution avec l\'extension Chrome.' },
+        { status: 400 }
+      );
+    }
+
+    // Check if student has actions
+    if (!submission.actions_json) {
+      return NextResponse.json(
+        { error: 'Aucune action enregistrée dans cette soumission' },
         { status: 400 }
       );
     }
@@ -152,9 +181,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Analyze with AI
-    const reviewResult = await analyzeSubmission(
-      submission.video_url || '',
+    // Compare actions with AI
+    const reviewResult = await compareActions(
+      submission.challenges.reference_actions_json,
+      submission.actions_json,
       submission.challenges.title,
       submission.challenges.description,
       submission.challenges.criteria_design,

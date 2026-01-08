@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
 
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      // Use service role client to verify token
       supabase = createClient(supabaseUrl, supabaseServiceKey, {
         auth: {
           autoRefreshToken: false,
@@ -46,13 +45,25 @@ export async function POST(request: NextRequest) {
       user = cookieUser;
     }
 
+    // Check if user is admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.is_admin) {
+      return NextResponse.json(
+        { error: 'Acces refuse - Admin uniquement' },
+        { status: 403 }
+      );
+    }
+
     const formData = await request.formData();
 
     const videoFile = formData.get('video') as File;
     const actionsJson = formData.get('actions') as string;
     const challengeId = formData.get('challenge_id') as string;
-    const duration = formData.get('duration') as string;
-    const bubbleUrl = formData.get('bubble_url') as string;
 
     if (!challengeId) {
       return NextResponse.json(
@@ -61,18 +72,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Upload video to Supabase Storage (if provided)
+    // Verify challenge exists and has AI correction enabled
+    const { data: challenge, error: challengeError } = await supabase
+      .from('challenges')
+      .select('id, ai_correction_enabled')
+      .eq('id', challengeId)
+      .single();
+
+    if (challengeError || !challenge) {
+      return NextResponse.json(
+        { error: 'Defi introuvable' },
+        { status: 404 }
+      );
+    }
+
+    if (!challenge.ai_correction_enabled) {
+      return NextResponse.json(
+        { error: 'La correction IA n\'est pas activee pour ce defi' },
+        { status: 400 }
+      );
+    }
+
+    // Upload reference video to Supabase Storage
     let publicUrl = null;
 
     if (videoFile && videoFile.size > 0) {
       const timestamp = Date.now();
-      const videoFileName = `${user.id}/${challengeId}/${timestamp}.webm`;
+      const videoFileName = `references/${challengeId}/${timestamp}.webm`;
 
       const { error: uploadError } = await supabase.storage
         .from('videos')
         .upload(videoFileName, videoFile, {
           contentType: 'video/webm',
-          upsert: false,
+          upsert: true, // Allow overwriting reference
         });
 
       if (uploadError) {
@@ -83,7 +115,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Get public URL
       const { data } = supabase.storage
         .from('videos')
         .getPublicUrl(videoFileName);
@@ -98,72 +129,33 @@ export async function POST(request: NextRequest) {
       console.warn('Could not parse actions JSON');
     }
 
-    // Check if challenge has AI correction enabled
-    const { data: challenge, error: challengeError } = await supabase
+    // Update challenge with reference data
+    const updateData: Record<string, unknown> = {};
+    if (publicUrl) {
+      updateData.reference_video_url = publicUrl;
+    }
+    if (parsedActions) {
+      updateData.reference_actions_json = parsedActions;
+    }
+
+    const { error: updateError } = await supabase
       .from('challenges')
-      .select('ai_correction_enabled')
-      .eq('id', challengeId)
-      .single();
+      .update(updateData)
+      .eq('id', challengeId);
 
-    console.log('Challenge fetch:', { challenge, challengeError, challengeId });
-    console.log('AI correction enabled:', challenge?.ai_correction_enabled);
-
-    // Create submission record
-    const { data: submission, error: insertError } = await supabase
-      .from('submissions')
-      .insert({
-        user_id: user.id,
-        challenge_id: challengeId,
-        video_url: publicUrl,
-        actions_json: parsedActions,
-        duration: duration ? parseInt(duration) : null,
-        bubble_url: bubbleUrl || null,
-        status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error('Insert error:', insertError);
+    if (updateError) {
+      console.error('Update error:', updateError);
       return NextResponse.json(
-        { error: 'Erreur lors de la création de la soumission' },
+        { error: 'Erreur lors de la mise a jour du defi' },
         { status: 500 }
       );
     }
 
-    // Trigger AI review if enabled for this challenge
-    console.log('Should trigger AI?', {
-      ai_correction_enabled: challenge?.ai_correction_enabled,
-      hasSubmission: !!submission,
-      submissionId: submission?.id
-    });
-
-    if (challenge?.ai_correction_enabled && submission) {
-      try {
-        // Call AI review endpoint asynchronously (don't wait for it)
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const aiReviewUrl = `${baseUrl}/api/ai-review`;
-        console.log('Triggering AI review at:', aiReviewUrl);
-
-        fetch(aiReviewUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ submission_id: submission.id }),
-        })
-          .then(res => res.json())
-          .then(data => console.log('AI review response:', data))
-          .catch(err => console.error('AI review trigger error:', err));
-      } catch (err) {
-        console.error('Failed to trigger AI review:', err);
-      }
-    } else {
-      console.log('AI review NOT triggered - conditions not met');
-    }
-
     return NextResponse.json({
       success: true,
-      submission,
-      ai_review_triggered: challenge?.ai_correction_enabled || false,
+      message: 'Reference enregistree avec succes',
+      reference_video_url: publicUrl,
+      has_actions: !!parsedActions,
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

@@ -35,6 +35,9 @@ export default function EditChallengePage() {
         .eq('id', params.id)
         .single();
 
+      console.log('Fetched challenge:', data);
+      console.log('ai_correction_enabled from DB:', data?.ai_correction_enabled);
+
       if (error || !data) {
         router.push('/admin/challenges');
         return;
@@ -63,12 +66,18 @@ export default function EditChallengePage() {
     setLoading(true);
     setError('');
 
+    console.log('Saving formData:', formData);
+    console.log('ai_correction_enabled value:', formData.ai_correction_enabled);
+
     const supabase = createClient();
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('challenges')
       .update(formData)
-      .eq('id', params.id);
+      .eq('id', params.id)
+      .select();
+
+    console.log('Update response:', { data, error });
 
     if (error) {
       setError(error.message);

@@ -77,17 +77,30 @@ export default async function AdminChallengesPage() {
                 <td className="px-6 py-4 text-[#101828]">{challenge.points_base} pts</td>
                 <td className="px-6 py-4 text-[#101828]">{submissionCounts?.[challenge.id] || 0}</td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      challenge.is_active
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {challenge.is_active ? 'Publie' : 'Brouillon'}
-                    </span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        challenge.is_active
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {challenge.is_active ? 'Publie' : 'Brouillon'}
+                      </span>
+                      {challenge.ai_correction_enabled && (
+                        <span className="px-2 py-1 bg-[#faf5ff] text-[#6d28d9] text-xs font-medium rounded-full">
+                          IA
+                        </span>
+                      )}
+                    </div>
                     {challenge.ai_correction_enabled && (
-                      <span className="px-2 py-1 bg-[#faf5ff] text-[#6d28d9] text-xs font-medium rounded-full">
-                        IA
+                      <span className={`text-xs ${
+                        challenge.reference_actions_json
+                          ? 'text-green-600'
+                          : 'text-orange-500'
+                      }`}>
+                        {challenge.reference_actions_json
+                          ? '✓ Reference enregistree'
+                          : '⚠ Reference manquante'}
                       </span>
                     )}
                   </div>
