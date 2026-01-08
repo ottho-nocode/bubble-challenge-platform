@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import WebRecorderWrapper from '@/components/WebRecorderWrapper';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
+import ExtensionLauncher from '@/components/ExtensionLauncher';
 
 const difficultyColors = {
   easy: 'bg-green-100 text-green-700',
@@ -117,33 +117,34 @@ export default async function ChallengePage({
             </div>
           )}
 
-          {/* Chrome Extension Alternative */}
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <h3 className="font-medium text-gray-900 mb-2">
-              Alternative : Extension Chrome
-            </h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Pour un tracking plus precis de vos actions, utilisez notre extension Chrome
-              (capture automatique des clics, saisies, etc.)
-            </p>
-            <a
-              href="https://github.com/ottho-nocode/bubble-recorder-plugin"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Telecharger l'extension &rarr;
-            </a>
-          </div>
         </div>
 
-        {/* Right Column - Recorder */}
-        <div>
-          <WebRecorderWrapper
-            challengeId={id}
-            challengeTitle={challenge.title}
-            timeLimit={challenge.time_limit}
-          />
+        {/* Right Column - Extension Launcher */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Commencer le defi
+            </h2>
+            <ExtensionLauncher
+              challengeId={id}
+              challengeTitle={challenge.title}
+            />
+          </div>
+
+          {/* Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h3 className="font-medium text-blue-900 mb-2">
+              Comment ca marche ?
+            </h3>
+            <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+              <li>Installez l'extension Chrome si ce n'est pas deja fait</li>
+              <li>Cliquez sur "Lancer l'enregistrement"</li>
+              <li>Ouvrez votre application Bubble dans un autre onglet</li>
+              <li>Realisez le defi en suivant les criteres</li>
+              <li>Cliquez sur l'icone de l'extension pour arreter</li>
+              <li>Soumettez votre travail</li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
