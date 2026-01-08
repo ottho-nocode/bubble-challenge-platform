@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const event = JSON.parse(payload);
-    console.log('Mux webhook received:', event.type);
+    console.log('Mux webhook received:', event.type, JSON.stringify(event.data, null, 2));
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false }
@@ -93,8 +93,10 @@ export async function POST(request: NextRequest) {
           }
         } else {
           // Create or update submission with video
+          console.log('Looking for existing submission:', { user_id, challenge_id });
+
           // First check if there's a pending submission for this user/challenge (with or without mux_asset_id)
-          const { data: existingSubmission } = await supabase
+          const { data: existingSubmission, error: searchError } = await supabase
             .from('submissions')
             .select('id, mux_asset_id')
             .eq('user_id', user_id)
@@ -104,8 +106,11 @@ export async function POST(request: NextRequest) {
             .limit(1)
             .single();
 
+          console.log('Submission search result:', { existingSubmission, searchError });
+
           if (existingSubmission) {
             // Update existing submission with video data
+            console.log('Updating existing submission:', existingSubmission.id);
             const { error } = await supabase
               .from('submissions')
               .update({
