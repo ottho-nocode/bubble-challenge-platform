@@ -97,7 +97,7 @@ export default function ExtensionLauncher({
       });
 
       if (response?.success) {
-        setMessage('Cliquez sur l\'icone de l\'extension Bubble Recorder dans votre barre d\'outils Chrome pour commencer l\'enregistrement.');
+        setMessage('L\'extension Bubble Recorder s\'ouvre... Selectionnez l\'onglet Bubble a enregistrer et cliquez sur Demarrer.');
       } else {
         setMessage('Erreur: ' + (response?.error || 'Impossible de communiquer avec l\'extension'));
       }
