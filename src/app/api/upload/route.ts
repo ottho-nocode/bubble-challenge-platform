@@ -46,13 +46,16 @@ export async function POST(request: NextRequest) {
       user = cookieUser;
     }
 
-    const formData = await request.formData();
-
-    const videoFile = formData.get('video') as File;
-    const actionsJson = formData.get('actions') as string;
-    const challengeId = formData.get('challenge_id') as string;
-    const duration = formData.get('duration') as string;
-    const bubbleUrl = formData.get('bubble_url') as string;
+    // Parse JSON body
+    const body = await request.json();
+    const {
+      challenge_id: challengeId,
+      actions,
+      screenshots,
+      metadata,
+      duration,
+      bubble_url: bubbleUrl
+    } = body;
 
     if (!challengeId) {
       return NextResponse.json(
@@ -61,42 +64,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Upload video to Supabase Storage (if provided)
-    let publicUrl = null;
+    console.log('Submission received:', {
+      challengeId,
+      actionsCount: actions?.length || 0,
+      screenshotsCount: screenshots?.length || 0,
+      duration
+    });
 
-    if (videoFile && videoFile.size > 0) {
-      const timestamp = Date.now();
-      const videoFileName = `${user.id}/${challengeId}/${timestamp}.webm`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(videoFileName, videoFile, {
-          contentType: 'video/webm',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        return NextResponse.json(
-          { error: 'Erreur lors de l\'upload de la video' },
-          { status: 500 }
-        );
-      }
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from('videos')
-        .getPublicUrl(videoFileName);
-      publicUrl = data.publicUrl;
-    }
-
-    // Parse actions JSON
-    let parsedActions = null;
-    try {
-      parsedActions = actionsJson ? JSON.parse(actionsJson) : null;
-    } catch {
-      console.warn('Could not parse actions JSON');
-    }
+    // Build submission data with actions and screenshots
+    const submissionData = {
+      actions: actions || [],
+      screenshots: screenshots || [],
+      metadata: metadata || {}
+    };
 
     // Check if challenge has AI correction enabled
     const { data: challenge, error: challengeError } = await supabase
@@ -114,9 +94,9 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         challenge_id: challengeId,
-        video_url: publicUrl,
-        actions_json: parsedActions,
-        duration: duration ? parseInt(duration) : null,
+        video_url: null, // No video, using screenshots instead
+        actions_json: submissionData,
+        duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
         bubble_url: bubbleUrl || null,
         status: 'pending',
       })
