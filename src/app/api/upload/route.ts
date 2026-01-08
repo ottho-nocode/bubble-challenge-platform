@@ -98,6 +98,13 @@ export async function POST(request: NextRequest) {
       console.warn('Could not parse actions JSON');
     }
 
+    // Check if challenge has AI correction enabled
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('ai_correction_enabled')
+      .eq('id', challengeId)
+      .single();
+
     // Create submission record
     const { data: submission, error: insertError } = await supabase
       .from('submissions')
@@ -121,9 +128,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Trigger AI review if enabled for this challenge
+    if (challenge?.ai_correction_enabled && submission) {
+      try {
+        // Call AI review endpoint asynchronously (don't wait for it)
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        fetch(`${baseUrl}/api/ai-review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submission_id: submission.id }),
+        }).catch(err => console.error('AI review trigger error:', err));
+      } catch (err) {
+        console.error('Failed to trigger AI review:', err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       submission,
+      ai_review_triggered: challenge?.ai_correction_enabled || false,
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

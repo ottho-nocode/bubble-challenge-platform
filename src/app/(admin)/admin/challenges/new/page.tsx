@@ -21,6 +21,7 @@ export default function NewChallengePage() {
     criteria_functionality: '',
     criteria_completion: '',
     is_active: false,
+    ai_correction_enabled: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -188,8 +189,8 @@ export default function NewChallengePage() {
             </div>
           </div>
 
-          {/* Publish option */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
+          {/* Options */}
+          <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -202,6 +203,26 @@ export default function NewChallengePage() {
                 <p className="text-sm text-[#6a7282]">Le defi sera visible par les eleves</p>
               </div>
             </label>
+
+            <div className="border-t border-[#e5e7eb] pt-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.ai_correction_enabled}
+                  onChange={(e) => setFormData({ ...formData, ai_correction_enabled: e.target.checked })}
+                  className="w-5 h-5 rounded border-[#e5e7eb] text-[#6d28d9] focus:ring-[#6d28d9]"
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-[#101828]">Correction par IA</p>
+                    <span className="px-2 py-0.5 bg-[#faf5ff] text-[#6d28d9] text-xs font-medium rounded-full">
+                      Beta
+                    </span>
+                  </div>
+                  <p className="text-sm text-[#6a7282]">Les soumissions seront automatiquement corrigees par l&apos;IA</p>
+                </div>
+              </label>
+            </div>
           </div>
 
           {/* Actions */}
