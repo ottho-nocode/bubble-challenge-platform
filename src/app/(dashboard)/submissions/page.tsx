@@ -168,11 +168,6 @@ export default async function SubmissionsPage({
                       Voir ma video
                     </Link>
                   )}
-                  {!submission.mux_playback_id && !submission.video_url && submission.status === 'pending' && (
-                    <span className="px-4 py-2 bg-gray-100 text-gray-400 rounded-xl text-sm text-center">
-                      Video en traitement...
-                    </span>
-                  )}
                   {review?.feedback_video_url && (
                     <a
                       href={review.feedback_video_url}
