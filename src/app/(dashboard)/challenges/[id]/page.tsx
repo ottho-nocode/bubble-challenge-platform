@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 import ExtensionLauncher from '@/components/ExtensionLauncher';
+import SubmissionValidator from '@/components/SubmissionValidator';
 
 const difficultyColors = {
   easy: 'bg-green-100 text-green-700',
@@ -18,10 +19,13 @@ const difficultyLabels = {
 
 export default async function ChallengePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ submission?: string }>;
 }) {
   const { id } = await params;
+  const { submission: submissionId } = await searchParams;
   const supabase = await createClient();
 
   const { data: challenge } = await supabase
@@ -119,32 +123,43 @@ export default async function ChallengePage({
 
         </div>
 
-        {/* Right Column - Extension Launcher */}
+        {/* Right Column - Submission Validator or Extension Launcher */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Commencer le defi
-            </h2>
-            <ExtensionLauncher
+          {submissionId ? (
+            /* Show submission validator when returning from recording */
+            <SubmissionValidator
+              submissionId={submissionId}
               challengeId={id}
               challengeTitle={challenge.title}
             />
-          </div>
+          ) : (
+            <>
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Commencer le defi
+                </h2>
+                <ExtensionLauncher
+                  challengeId={id}
+                  challengeTitle={challenge.title}
+                />
+              </div>
 
-          {/* Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h3 className="font-medium text-blue-900 mb-2">
-              Comment ca marche ?
-            </h3>
-            <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-              <li>Installez l'extension Chrome si ce n'est pas deja fait</li>
-              <li>Cliquez sur "Lancer l'enregistrement"</li>
-              <li>Ouvrez votre application Bubble dans un autre onglet</li>
-              <li>Realisez le defi en suivant les criteres</li>
-              <li>Cliquez sur l'icone de l'extension pour arreter</li>
-              <li>Soumettez votre travail</li>
-            </ol>
-          </div>
+              {/* Instructions */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h3 className="font-medium text-blue-900 mb-2">
+                  Comment ca marche ?
+                </h3>
+                <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                  <li>Installez l'extension Chrome si ce n'est pas deja fait</li>
+                  <li>Cliquez sur "Lancer l'enregistrement"</li>
+                  <li>Ouvrez votre application Bubble dans un autre onglet</li>
+                  <li>Realisez le defi en suivant les criteres</li>
+                  <li>Cliquez sur l'icone de l'extension pour arreter</li>
+                  <li>Validez votre soumission</li>
+                </ol>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
