@@ -41,16 +41,8 @@ export async function POST(
       return NextResponse.json({ error: `Cette soumission a deja ete validee (status: ${submission.status})` }, { status: 400 });
     }
 
-    // Update status to submitted (ready for review)
-    const { error: updateError } = await supabase
-      .from('submissions')
-      .update({ status: 'submitted' })
-      .eq('id', id);
-
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return NextResponse.json({ error: 'Erreur lors de la mise a jour: ' + updateError.message }, { status: 500 });
-    }
+    // Status stays 'pending' - AI review will change it to 'reviewed' when done
+    console.log('Submission validated, triggering AI review...');
 
     // Trigger AI review if challenge has it enabled
     const { data: challenge } = await supabase
