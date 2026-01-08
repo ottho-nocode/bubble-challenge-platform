@@ -47,7 +47,7 @@ IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans au
 }`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-05-20' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
