@@ -88,8 +88,10 @@ export default function ExtensionLauncher({
     try {
       const returnUrl = `${window.location.origin}/submissions`;
 
+      setMessage('Ouverture de votre application Bubble et demarrage de l\'enregistrement...');
+
       const response = await sendMessageToExtension({
-        type: 'PREPARE_RECORDING',
+        type: 'START_RECORDING_ON_URL',
         data: {
           challengeId,
           challengeTitle,
@@ -99,12 +101,12 @@ export default function ExtensionLauncher({
       });
 
       if (response?.success) {
-        setMessage('L\'extension Bubble Recorder s\'ouvre... Selectionnez l\'onglet Bubble a enregistrer et cliquez sur Demarrer.');
+        setMessage('Enregistrement en cours ! Realisez le defi dans l\'onglet Bubble, puis cliquez sur l\'icone de l\'extension pour arreter.');
       } else {
-        setMessage('Erreur: ' + (response?.error || 'Impossible de communiquer avec l\'extension'));
+        setMessage('Erreur: ' + (response?.error || 'Impossible de demarrer l\'enregistrement'));
       }
     } catch (error) {
-      console.error('Error preparing recording:', error);
+      console.error('Error starting recording:', error);
       setMessage('Erreur de communication avec l\'extension. Rechargez la page et reessayez.');
     }
 
