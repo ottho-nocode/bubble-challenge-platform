@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft, Upload, Trash, VideoCamera, CheckCircle } from '@phosphor-icons/react';
 
 export default function EditChallengePage() {
   const router = useRouter();
@@ -12,6 +12,12 @@ export default function EditChallengePage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
+  const [uploadingReference, setUploadingReference] = useState(false);
+  const [referenceStatus, setReferenceStatus] = useState<{
+    hasReference: boolean;
+    videoUrl: string | null;
+  }>({ hasReference: false, videoUrl: null });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -31,7 +37,7 @@ export default function EditChallengePage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('challenges')
-        .select('*')
+        .select('*, reference_video_url, reference_actions_json')
         .eq('id', params.id)
         .single();
 
@@ -55,11 +61,97 @@ export default function EditChallengePage() {
         is_active: data.is_active,
         ai_correction_enabled: data.ai_correction_enabled || false,
       });
+
+      setReferenceStatus({
+        hasReference: !!data.reference_actions_json,
+        videoUrl: data.reference_video_url || null,
+      });
+
       setFetching(false);
     };
 
     fetchChallenge();
   }, [params.id, router]);
+
+  const handleReferenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingReference(true);
+    setError('');
+
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        setError('Session expirée');
+        return;
+      }
+
+      // Create FormData for upload
+      const formDataUpload = new FormData();
+      formDataUpload.append('challenge_id', params.id as string);
+      formDataUpload.append('video', file);
+      formDataUpload.append('actions', JSON.stringify([])); // Empty actions for manual upload
+
+      const response = await fetch('/api/upload-reference', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: formDataUpload,
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setReferenceStatus({
+          hasReference: true,
+          videoUrl: result.reference_video_url || null,
+        });
+      } else {
+        setError(result.error || 'Erreur lors de l\'upload');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError('Erreur lors de l\'upload de la vidéo');
+    } finally {
+      setUploadingReference(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteReference = async () => {
+    if (!confirm('Supprimer la vidéo de référence ?')) return;
+
+    setUploadingReference(true);
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from('challenges')
+        .update({
+          reference_video_url: null,
+          reference_actions_json: null,
+        })
+        .eq('id', params.id);
+
+      if (error) throw error;
+
+      setReferenceStatus({
+        hasReference: false,
+        videoUrl: null,
+      });
+    } catch (err) {
+      console.error('Delete error:', err);
+      setError('Erreur lors de la suppression');
+    } finally {
+      setUploadingReference(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,6 +362,87 @@ export default function EditChallengePage() {
                 </div>
               </label>
             </div>
+
+            {/* Reference Video Section - Only show when AI is enabled */}
+            {formData.ai_correction_enabled && (
+              <div className="border-t border-[#e5e7eb] pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <VideoCamera size={20} className="text-[#6d28d9]" />
+                  <p className="font-medium text-[#101828]">Video de reference</p>
+                </div>
+                <p className="text-sm text-[#6a7282] mb-4">
+                  Uploadez une video montrant la solution attendue. L&apos;IA comparera les soumissions des eleves a cette reference.
+                </p>
+
+                {referenceStatus.hasReference ? (
+                  <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle size={24} className="text-[#22c55e]" weight="fill" />
+                        <div>
+                          <p className="font-medium text-[#166534]">Reference enregistree</p>
+                          <p className="text-sm text-[#15803d]">La video de reference est prete</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {referenceStatus.videoUrl && (
+                          <a
+                            href={referenceStatus.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 text-sm bg-white border border-[#e5e7eb] rounded-lg hover:bg-[#f9fafb] transition-colors"
+                          >
+                            Voir
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleDeleteReference}
+                          disabled={uploadingReference}
+                          className="p-1.5 text-[#dc2626] hover:bg-[#fee2e2] rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          <Trash size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-[#e5e7eb] rounded-xl p-6 text-center">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="video/*"
+                      onChange={handleReferenceUpload}
+                      className="hidden"
+                      id="reference-video-input"
+                    />
+                    <Upload size={32} className="mx-auto text-[#9ca3af] mb-3" />
+                    <p className="text-sm text-[#6a7282] mb-3">
+                      Glissez une video ou cliquez pour uploader
+                    </p>
+                    <label
+                      htmlFor="reference-video-input"
+                      className={`inline-flex items-center gap-2 px-4 py-2 bg-[#6d28d9] text-white rounded-lg cursor-pointer hover:bg-[#5b21b6] transition-colors ${uploadingReference ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {uploadingReference ? (
+                        <>
+                          <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+                          Upload en cours...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={18} />
+                          Choisir une video
+                        </>
+                      )}
+                    </label>
+                    <p className="text-xs text-[#9ca3af] mt-3">
+                      Formats acceptes: MP4, WebM, MOV
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Actions */}

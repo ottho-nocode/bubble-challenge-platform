@@ -122,20 +122,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse actions JSON
-    let parsedActions = null;
+    let parsedActions = [];
     try {
-      parsedActions = actionsJson ? JSON.parse(actionsJson) : null;
+      parsedActions = actionsJson ? JSON.parse(actionsJson) : [];
     } catch {
       console.warn('Could not parse actions JSON');
+      parsedActions = [];
     }
 
     // Update challenge with reference data
-    const updateData: Record<string, unknown> = {};
+    const updateData: Record<string, unknown> = {
+      // Always set reference_actions_json (even empty array marks it as "has reference")
+      reference_actions_json: parsedActions,
+    };
     if (publicUrl) {
       updateData.reference_video_url = publicUrl;
-    }
-    if (parsedActions) {
-      updateData.reference_actions_json = parsedActions;
     }
 
     const { error: updateError } = await supabase
