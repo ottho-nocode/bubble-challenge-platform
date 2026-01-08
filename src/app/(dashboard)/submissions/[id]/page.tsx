@@ -3,8 +3,22 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Trophy, Robot, User } from '@phosphor-icons/react';
+import { ArrowLeft, Clock, Trophy, Robot, User, CaretLeft, CaretRight, Images } from '@phosphor-icons/react';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
+
+interface Screenshot {
+  t: number;
+  data: string;
+}
+
+interface ActionsJson {
+  actions: Array<unknown>;
+  screenshots: Screenshot[];
+  metadata: {
+    duration: number;
+    videoUploaded: boolean;
+  };
+}
 
 interface Submission {
   id: string;
@@ -14,6 +28,7 @@ interface Submission {
   bubble_url: string | null;
   mux_playback_id: string | null;
   video_url: string | null;
+  actions_json: ActionsJson | null;
   challenges: {
     id: string;
     title: string;
@@ -42,6 +57,7 @@ export default function SubmissionDetailPage({
 }) {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentScreenshot, setCurrentScreenshot] = useState(0);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -57,7 +73,14 @@ export default function SubmissionDetailPage({
       const { data, error } = await supabase
         .from('submissions')
         .select(`
-          *,
+          id,
+          status,
+          created_at,
+          duration,
+          bubble_url,
+          mux_playback_id,
+          video_url,
+          actions_json,
           challenges (
             id,
             title,
@@ -83,7 +106,12 @@ export default function SubmissionDetailPage({
         .single();
 
       if (!error && data) {
-        setSubmission(data);
+        // Transform the data - Supabase returns challenges as array for single()
+        const transformedData = {
+          ...data,
+          challenges: Array.isArray(data.challenges) ? data.challenges[0] : data.challenges,
+        };
+        setSubmission(transformedData);
       }
       setLoading(false);
     };
@@ -148,7 +176,7 @@ export default function SubmissionDetailPage({
         </p>
       </div>
 
-      {/* Video Player */}
+      {/* Video Player or Screenshots */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
         <div className="p-4 bg-gray-900">
           {submission.mux_playback_id ? (
@@ -163,9 +191,45 @@ export default function SubmissionDetailPage({
               className="w-full rounded-lg"
               style={{ aspectRatio: '16/9' }}
             />
+          ) : submission.actions_json?.screenshots && submission.actions_json.screenshots.length > 0 ? (
+            <div className="relative">
+              {/* Screenshot display */}
+              <img
+                src={submission.actions_json.screenshots[currentScreenshot]?.data}
+                alt={`Capture ${currentScreenshot + 1}`}
+                className="w-full rounded-lg"
+                style={{ aspectRatio: '16/9', objectFit: 'contain', backgroundColor: '#1f2937' }}
+              />
+
+              {/* Navigation buttons */}
+              {submission.actions_json.screenshots.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setCurrentScreenshot(prev => Math.max(0, prev - 1))}
+                    disabled={currentScreenshot === 0}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <CaretLeft size={24} />
+                  </button>
+                  <button
+                    onClick={() => setCurrentScreenshot(prev => Math.min(submission.actions_json!.screenshots.length - 1, prev + 1))}
+                    disabled={currentScreenshot === submission.actions_json.screenshots.length - 1}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <CaretRight size={24} />
+                  </button>
+                </>
+              )}
+
+              {/* Counter */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/50 rounded-full text-white text-sm">
+                {currentScreenshot + 1} / {submission.actions_json.screenshots.length}
+              </div>
+            </div>
           ) : (
-            <div className="aspect-video flex items-center justify-center bg-gray-800 rounded-lg">
-              <p className="text-gray-400">Video en cours de traitement...</p>
+            <div className="aspect-video flex flex-col items-center justify-center bg-gray-800 rounded-lg">
+              <Images size={48} className="text-gray-500 mb-2" />
+              <p className="text-gray-400">Aucune capture disponible</p>
             </div>
           )}
         </div>
@@ -177,6 +241,12 @@ export default function SubmissionDetailPage({
               <span className="flex items-center gap-1">
                 <Clock size={16} />
                 {formatDuration(submission.duration)}
+              </span>
+            )}
+            {submission.actions_json?.screenshots && (
+              <span className="flex items-center gap-1">
+                <Images size={16} />
+                {submission.actions_json.screenshots.length} captures
               </span>
             )}
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${

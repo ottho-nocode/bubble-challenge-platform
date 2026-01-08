@@ -38,7 +38,13 @@ export default async function SubmissionsPage({
   const { data: submissions } = await supabase
     .from('submissions')
     .select(`
-      *,
+      id,
+      status,
+      created_at,
+      duration,
+      mux_playback_id,
+      video_url,
+      actions_json,
       challenges (
         title,
         difficulty,
@@ -68,11 +74,12 @@ export default async function SubmissionsPage({
       <div className="space-y-4">
         {submissions?.map((submission) => {
           const review = submission.reviews?.[0];
+          const challenge = Array.isArray(submission.challenges) ? submission.challenges[0] : submission.challenges;
           const totalScore = review
             ? review.score_design + review.score_functionality + review.score_completion
             : null;
           const isAiReview = review?.is_ai_review;
-          const isPendingAi = submission.status === 'pending' && submission.challenges?.ai_correction_enabled;
+          const isPendingAi = submission.status === 'pending' && challenge?.ai_correction_enabled;
 
           return (
             <div key={submission.id} className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
@@ -80,7 +87,7 @@ export default async function SubmissionsPage({
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-semibold text-[#101828]">
-                      {submission.challenges?.title || 'Defi inconnu'}
+                      {challenge?.title || 'Defi inconnu'}
                     </h2>
                     {isPendingAi ? (
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#faf5ff] text-[#6d28d9] flex items-center gap-2">
@@ -144,10 +151,10 @@ export default async function SubmissionsPage({
                       <div className="flex items-center gap-2 font-semibold">
                         <span className="text-[#6d28d9]">Score total: {totalScore}/15</span>
                         <span className="text-[#6a7282]">+</span>
-                        <span className="text-[#6a7282]">{submission.challenges?.points_base} pts base</span>
+                        <span className="text-[#6a7282]">{challenge?.points_base} pts base</span>
                         <span className="text-[#6a7282]">=</span>
                         <span className="text-[#22c55e]">
-                          {(totalScore || 0) + (submission.challenges?.points_base || 0)} pts
+                          {(totalScore || 0) + (challenge?.points_base || 0)} pts
                         </span>
                       </div>
                       {review.comment && (
@@ -160,14 +167,21 @@ export default async function SubmissionsPage({
                 </div>
 
                 <div className="flex flex-col gap-2 ml-6 shrink-0">
-                  {(submission.mux_playback_id || submission.video_url) && (
+                  {(submission.mux_playback_id || submission.video_url) ? (
                     <Link
                       href={`/submissions/${submission.id}`}
                       className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-xl text-sm font-medium hover:bg-[#e5e7eb] transition-colors text-center"
                     >
                       Voir ma video
                     </Link>
-                  )}
+                  ) : submission.actions_json?.screenshots?.length > 0 ? (
+                    <Link
+                      href={`/submissions/${submission.id}`}
+                      className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-xl text-sm font-medium hover:bg-[#e5e7eb] transition-colors text-center"
+                    >
+                      Voir les captures
+                    </Link>
+                  ) : null}
                   {review?.feedback_video_url && (
                     <a
                       href={review.feedback_video_url}
