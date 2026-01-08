@@ -93,20 +93,19 @@ export async function POST(request: NextRequest) {
           }
         } else {
           // Create or update submission with video
-          // First check if there's a pending submission for this user/challenge
+          // First check if there's a pending submission for this user/challenge (with or without mux_asset_id)
           const { data: existingSubmission } = await supabase
             .from('submissions')
-            .select('id')
+            .select('id, mux_asset_id')
             .eq('user_id', user_id)
             .eq('challenge_id', challenge_id)
             .eq('status', 'pending')
-            .is('mux_asset_id', null)
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
           if (existingSubmission) {
-            // Update existing submission
+            // Update existing submission with video data
             const { error } = await supabase
               .from('submissions')
               .update({
@@ -123,7 +122,7 @@ export async function POST(request: NextRequest) {
               console.log('Submission video updated:', existingSubmission.id);
             }
           } else {
-            // Create new submission with video
+            // Create new submission with video (actions will be added by /api/upload later)
             const { data: newSubmission, error } = await supabase
               .from('submissions')
               .insert({

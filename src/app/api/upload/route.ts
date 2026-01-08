@@ -88,23 +88,61 @@ export async function POST(request: NextRequest) {
     console.log('Challenge fetch:', { challenge, challengeError, challengeId });
     console.log('AI correction enabled:', challenge?.ai_correction_enabled);
 
-    // Create submission record
-    const { data: submission, error: insertError } = await supabase
+    // Check if there's already a submission created by Mux webhook (has mux_asset_id)
+    // This happens when video upload completes before this endpoint is called
+    const { data: existingSubmission } = await supabase
       .from('submissions')
-      .insert({
-        user_id: user.id,
-        challenge_id: challengeId,
-        video_url: null, // No video, using screenshots instead
-        actions_json: submissionData,
-        duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
-        bubble_url: bubbleUrl || null,
-        status: 'pending',
-      })
-      .select()
+      .select('id, mux_asset_id, mux_playback_id')
+      .eq('user_id', user.id)
+      .eq('challenge_id', challengeId)
+      .eq('status', 'pending')
+      .not('mux_asset_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
+    let submission;
+    let insertError;
+
+    if (existingSubmission) {
+      // Update existing submission created by webhook
+      console.log('Found existing submission from webhook:', existingSubmission.id);
+      const { data: updated, error } = await supabase
+        .from('submissions')
+        .update({
+          actions_json: submissionData,
+          duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
+          bubble_url: bubbleUrl || null,
+        })
+        .eq('id', existingSubmission.id)
+        .select()
+        .single();
+
+      submission = updated;
+      insertError = error;
+    } else {
+      // Create new submission record (webhook will update with video later)
+      console.log('Creating new submission (no webhook submission found)');
+      const { data: inserted, error } = await supabase
+        .from('submissions')
+        .insert({
+          user_id: user.id,
+          challenge_id: challengeId,
+          video_url: null,
+          actions_json: submissionData,
+          duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
+          bubble_url: bubbleUrl || null,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      submission = inserted;
+      insertError = error;
+    }
+
     if (insertError) {
-      console.error('Insert error:', insertError);
+      console.error('Insert/Update error:', insertError);
       return NextResponse.json(
         { error: 'Erreur lors de la création de la soumission' },
         { status: 500 }
