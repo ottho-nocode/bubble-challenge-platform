@@ -243,7 +243,7 @@ export default function SubmissionDetailPage({
                 {formatDuration(submission.duration)}
               </span>
             )}
-            {submission.actions_json?.screenshots && (
+            {submission.actions_json?.screenshots && submission.actions_json.screenshots.length > 0 && (
               <span className="flex items-center gap-1">
                 <Images size={16} />
                 {submission.actions_json.screenshots.length} captures
