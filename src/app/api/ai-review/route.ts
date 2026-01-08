@@ -53,48 +53,105 @@ async function compareActions(
     studentScreenshots
   });
 
-  // Log first few actions for debugging
-  console.log('Reference actions (first 3):', JSON.stringify(referenceActions.slice(0, 3), null, 2));
-  console.log('Student actions (first 3):', JSON.stringify(studentActions.slice(0, 3), null, 2));
+  // Log actions for debugging
+  console.log('=== AI REVIEW DEBUG ===');
+  console.log('Reference actions count:', referenceActions.length);
+  console.log('Student actions count:', studentActions.length);
+  console.log('Reference actions (first 5):', JSON.stringify(referenceActions.slice(0, 5), null, 2));
+  console.log('Student actions (first 5):', JSON.stringify(studentActions.slice(0, 5), null, 2));
+
+  // Summarize actions for clearer analysis
+  const summarizeActions = (actions: unknown[]) => {
+    return actions.map((action: unknown, index: number) => {
+      const a = action as Record<string, unknown>;
+      const summary: Record<string, unknown> = {
+        step: index + 1,
+        type: a.type,
+        time: `${Math.round((a.t as number || 0) / 1000)}s`
+      };
+
+      if (a.type === 'click') {
+        summary.what = a.text || a.element || 'élément';
+        if (a.context) summary.where = a.context;
+        if (a.role) summary.role = a.role;
+      } else if (a.type === 'input') {
+        summary.field = a.label || a.element || 'champ';
+        summary.value = a.value;
+        if (a.context) summary.where = a.context;
+      } else if (a.type === 'drag') {
+        summary.what = a.text || a.element || 'élément';
+        summary.from = `(${a.x1}, ${a.y1})`;
+        summary.to = `(${a.x2}, ${a.y2})`;
+      } else if (a.type === 'navigate') {
+        summary.url = a.url;
+      } else if (a.type === 'keypress') {
+        summary.key = a.key;
+      }
+
+      return summary;
+    });
+  };
+
+  const refSummary = summarizeActions(referenceActions);
+  const studentSummary = summarizeActions(studentActions);
+
+  console.log('Reference summary (first 5):', JSON.stringify(refSummary.slice(0, 5), null, 2));
+  console.log('Student summary (first 5):', JSON.stringify(studentSummary.slice(0, 5), null, 2));
+  console.log('=== END DEBUG ===');
 
   const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer la soumission d'un élève en comparant ses actions avec la solution de référence.
 
-DÉFI: ${challengeTitle}
-DESCRIPTION: ${challengeDescription}
+## DÉFI
+**Titre:** ${challengeTitle}
+**Description:** ${challengeDescription}
 
-CRITÈRES D'ÉVALUATION:
-1. Design (0-5): ${criteriaDesign}
-2. Fonctionnalités (0-5): ${criteriaFunctionality}
-3. Réalisation (0-5): ${criteriaCompletion}
+## CRITÈRES D'ÉVALUATION
+- **Design (0-5):** ${criteriaDesign}
+- **Fonctionnalités (0-5):** ${criteriaFunctionality}
+- **Réalisation (0-5):** ${criteriaCompletion}
 
-STATISTIQUES:
-- Référence: ${referenceActions.length} actions, ${refScreenshots} captures d'écran
-- Élève: ${studentActions.length} actions, ${studentScreenshots} captures d'écran
+## STATISTIQUES
+| | Référence | Élève |
+|---|---|---|
+| Actions | ${referenceActions.length} | ${studentActions.length} |
+| Captures | ${refScreenshots} | ${studentScreenshots} |
 
-ACTIONS DE RÉFÉRENCE (solution attendue):
-${JSON.stringify(referenceActions, null, 2)}
+## ACTIONS DE RÉFÉRENCE (ce que l'élève doit faire)
+\`\`\`json
+${JSON.stringify(refSummary, null, 2)}
+\`\`\`
 
-ACTIONS DE L'ÉLÈVE (soumission à évaluer):
-${JSON.stringify(studentActions, null, 2)}
+## ACTIONS DE L'ÉLÈVE (ce qu'il a fait)
+\`\`\`json
+${JSON.stringify(studentSummary, null, 2)}
+\`\`\`
 
-Analyse les deux séquences d'actions et évalue:
-- L'élève a-t-il effectué les mêmes types d'actions que la référence (clics, saisies, navigation) ?
-- L'ordre général des actions est-il cohérent ?
-- Y a-t-il des actions essentielles manquantes ?
-- Les valeurs saisies (inputs) sont-elles correctes ou similaires ?
-- Le nombre d'actions est-il comparable à la référence ?
+## GUIDE D'ANALYSE
+Chaque action contient:
+- **type**: click, input, drag, navigate, keypress, scroll
+- **what/text**: le texte visible de l'élément cliqué (ex: "Enregistrer", "Design", "Ajouter")
+- **where/context**: la section/panneau où se trouve l'élément (ex: "Properties > Appearance")
+- **field/label**: pour les inputs, le nom du champ
+- **value**: la valeur saisie
 
-Fournis:
-1. Un score de 0 à 5 pour chaque critère (0 = non réalisé, 5 = parfait)
-2. Un commentaire constructif et bienveillant en français (2-3 phrases max) expliquant ce qui a été bien fait et ce qui peut être amélioré
+## POINTS À ÉVALUER
+1. **Correspondance des actions clés**: L'élève a-t-il cliqué sur les mêmes éléments que la référence (boutons, onglets, options)?
+2. **Séquence logique**: Les actions sont-elles dans un ordre cohérent?
+3. **Valeurs saisies**: Les inputs sont-ils corrects (couleurs, textes, dimensions)?
+4. **Actions manquantes**: Y a-t-il des étapes essentielles non réalisées?
+5. **Actions superflues**: L'élève a-t-il fait beaucoup d'essais-erreurs?
 
-IMPORTANT: Réponds UNIQUEMENT avec un JSON valide dans ce format exact, sans aucun texte avant ou après:
-{
-  "score_design": <number 0-5>,
-  "score_functionality": <number 0-5>,
-  "score_completion": <number 0-5>,
-  "comment": "<string>"
-}`;
+## BARÈME
+- 5/5: Parfait, toutes les étapes sont correctes
+- 4/5: Très bien, quelques petites différences mineures
+- 3/5: Bien, l'essentiel est fait mais il manque des détails
+- 2/5: Partiel, plusieurs étapes manquantes ou incorrectes
+- 1/5: Insuffisant, peu d'étapes correctes
+- 0/5: Non réalisé ou complètement hors sujet
+
+## RÉPONSE ATTENDUE
+Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans texte avant/après):
+{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif en français (2-3 phrases). Mentionne ce qui a été bien fait ET ce qui peut être amélioré."}`;
 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
