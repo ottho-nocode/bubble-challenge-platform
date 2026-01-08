@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Robot, User, Clock, CheckCircle, XCircle, CaretDown, CaretRight, Image as ImageIcon } from '@phosphor-icons/react';
+import { ArrowLeft, Robot, User, Clock, CheckCircle, XCircle, CaretDown, CaretRight, Image as ImageIcon, VideoCamera } from '@phosphor-icons/react';
+import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 
 interface ActionData {
   t: number;
@@ -33,6 +34,9 @@ interface Submission {
   duration: number | null;
   bubble_url: string | null;
   actions_json: SubmissionData | ActionData[] | null;
+  mux_playback_id: string | null;
+  mux_asset_id: string | null;
+  video_url: string | null;
   challenges: {
     id: string;
     title: string;
@@ -43,6 +47,7 @@ interface Submission {
     criteria_completion: string;
     ai_correction_enabled: boolean;
     reference_actions_json: SubmissionData | ActionData[] | null;
+    reference_video_playback_id: string | null;
   } | null;
   profiles: {
     username: string;
@@ -271,7 +276,8 @@ export default function AdminSubmissionDetailPage({
             criteria_functionality,
             criteria_completion,
             ai_correction_enabled,
-            reference_actions_json
+            reference_actions_json,
+            reference_video_playback_id
           ),
           profiles (username, email),
           reviews (
@@ -436,6 +442,51 @@ export default function AdminSubmissionDetailPage({
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{review.comment}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Video comparison */}
+      {(submission.mux_playback_id || submission.challenges?.reference_video_playback_id) && (
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          {/* Reference video */}
+          <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <div className="px-4 py-3 bg-emerald-600 flex items-center gap-2">
+              <VideoCamera size={18} className="text-white" />
+              <h3 className="font-semibold text-white">Video de reference</h3>
+            </div>
+            <div className="p-4">
+              {submission.challenges?.reference_video_playback_id ? (
+                <MuxVideoPlayer
+                  playbackId={submission.challenges.reference_video_playback_id}
+                  title="Video de reference"
+                />
+              ) : (
+                <div className="bg-gray-100 rounded-xl flex items-center justify-center aspect-video">
+                  <p className="text-gray-400">Aucune video de reference</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Student video */}
+          <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <div className="px-4 py-3 bg-blue-600 flex items-center gap-2">
+              <VideoCamera size={18} className="text-white" />
+              <h3 className="font-semibold text-white">Video de l'eleve</h3>
+            </div>
+            <div className="p-4">
+              {submission.mux_playback_id ? (
+                <MuxVideoPlayer
+                  playbackId={submission.mux_playback_id}
+                  title="Video de l'eleve"
+                />
+              ) : (
+                <div className="bg-gray-100 rounded-xl flex items-center justify-center aspect-video">
+                  <p className="text-gray-400">Aucune video disponible</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

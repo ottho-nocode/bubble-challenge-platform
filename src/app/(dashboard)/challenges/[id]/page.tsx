@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import WebRecorderWrapper from '@/components/WebRecorderWrapper';
+import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 
 const difficultyColors = {
   easy: 'bg-green-100 text-green-700',
@@ -98,6 +99,23 @@ export default async function ChallengePage({
               </div>
             </div>
           </div>
+
+          {/* Reference Video */}
+          {challenge.reference_video_playback_id && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span>🎬</span>
+                Video de reference
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Regardez cette video pour comprendre le resultat attendu.
+              </p>
+              <MuxVideoPlayer
+                playbackId={challenge.reference_video_playback_id}
+                title={`Reference - ${challenge.title}`}
+              />
+            </div>
+          )}
 
           {/* Chrome Extension Alternative */}
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">

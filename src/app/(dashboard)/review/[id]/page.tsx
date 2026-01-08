@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, Play, Info, Trophy } from '@phosphor-icons/react';
+import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 
 interface Submission {
   id: string;
   video_url: string;
+  mux_playback_id: string | null;
   duration: number;
   created_at: string;
   challenges: {
@@ -159,7 +161,26 @@ export default function ReviewDetailPage({
         <div className="flex-1 space-y-6">
           {/* Video Player */}
           <div className="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-[#1e2939]">
-            {submission?.video_url ? (
+            {submission?.mux_playback_id ? (
+              <>
+                <MuxVideoPlayer
+                  playbackId={submission.mux_playback_id}
+                  title={`Soumission - ${submission.challenges?.title}`}
+                  className="w-full"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                />
+                {/* Video Info Overlay */}
+                <div className="p-4 bg-gradient-to-t from-black/60 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none">
+                  <h2 className="text-lg font-bold text-white mb-1">
+                    Soumission par {submission?.profiles?.username}
+                  </h2>
+                  <p className="text-[#d1d5dc] text-sm">
+                    Defi: {submission?.challenges?.title}
+                  </p>
+                </div>
+              </>
+            ) : submission?.video_url ? (
               <>
                 <video
                   id="submission-video"

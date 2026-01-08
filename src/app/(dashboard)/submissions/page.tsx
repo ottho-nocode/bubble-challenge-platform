@@ -140,15 +140,18 @@ export default async function SubmissionsPage() {
                 </div>
 
                 <div className="flex flex-col gap-2 ml-6 shrink-0">
-                  {submission.video_url && (
-                    <a
-                      href={submission.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {(submission.mux_playback_id || submission.video_url) && (
+                    <Link
+                      href={`/submissions/${submission.id}`}
                       className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-xl text-sm font-medium hover:bg-[#e5e7eb] transition-colors text-center"
                     >
-                      Voir la video
-                    </a>
+                      Voir ma video
+                    </Link>
+                  )}
+                  {!submission.mux_playback_id && !submission.video_url && submission.status === 'pending' && (
+                    <span className="px-4 py-2 bg-gray-100 text-gray-400 rounded-xl text-sm text-center">
+                      Video en traitement...
+                    </span>
                   )}
                   {review?.feedback_video_url && (
                     <a
