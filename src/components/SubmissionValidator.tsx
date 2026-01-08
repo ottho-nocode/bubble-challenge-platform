@@ -30,14 +30,9 @@ export default function SubmissionValidator({
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Poll for submission data (video might still be processing)
+  // Fetch submission data once
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    let stopped = false;
-
     const fetchSubmission = async () => {
-      if (stopped) return;
-
       try {
         console.log('Fetching submission:', submissionId);
         const response = await fetch(`/api/submissions/${submissionId}`);
@@ -48,35 +43,18 @@ export default function SubmissionValidator({
         if (response.ok && data.submission) {
           setSubmission(data.submission);
           setError(null);
-
-          // Stop polling if video is ready
-          if (data.submission?.mux_playback_id) {
-            clearInterval(interval);
-            stopped = true;
-          }
         } else {
           console.error('Submission fetch error:', data);
           setError(data.error || 'Soumission introuvable');
-          clearInterval(interval);
-          stopped = true;
         }
       } catch (err) {
         console.error('Error fetching submission:', err);
         setError('Erreur de connexion au serveur');
-        clearInterval(interval);
-        stopped = true;
       }
       setLoading(false);
     };
 
     fetchSubmission();
-    // Poll every 3 seconds while video is processing
-    interval = setInterval(fetchSubmission, 3000);
-
-    return () => {
-      clearInterval(interval);
-      stopped = true;
-    };
   }, [submissionId]);
 
   const handleValidate = async () => {
@@ -158,10 +136,12 @@ export default function SubmissionValidator({
             title={`Soumission - ${challengeTitle}`}
           />
         ) : (
-          <div className="bg-gray-100 rounded-xl aspect-video flex flex-col items-center justify-center">
-            <Clock size={48} className="text-gray-400 mb-3 animate-pulse" />
-            <p className="text-gray-600 font-medium">Video en cours de traitement...</p>
-            <p className="text-gray-500 text-sm mt-1">Cela peut prendre quelques secondes</p>
+          <div className="bg-gray-100 rounded-xl py-8 px-4 flex flex-col items-center justify-center">
+            <CheckCircle size={48} className="text-green-500 mb-3" />
+            <p className="text-gray-700 font-medium">Enregistrement termine</p>
+            <p className="text-gray-500 text-sm mt-1 text-center">
+              Vos actions ont ete capturees. Cliquez sur Valider pour soumettre.
+            </p>
           </div>
         )}
       </div>
@@ -176,8 +156,7 @@ export default function SubmissionValidator({
       {/* Info message */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          Verifiez que votre video montre bien la realisation du defi.
-          Une fois validee, votre soumission sera evaluee automatiquement.
+          Une fois validee, votre soumission sera evaluee automatiquement par l&apos;IA.
         </p>
       </div>
 
@@ -191,7 +170,7 @@ export default function SubmissionValidator({
         </button>
         <button
           onClick={handleValidate}
-          disabled={!submission?.mux_playback_id || validating}
+          disabled={validating}
           className="flex-1 px-4 py-3 bg-[#6d28d9] text-white rounded-xl font-medium hover:bg-[#5b21b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
           {validating ? (
