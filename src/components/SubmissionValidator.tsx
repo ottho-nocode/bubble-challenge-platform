@@ -153,13 +153,6 @@ export default function SubmissionValidator({
         </p>
       )}
 
-      {/* Info message */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
-          Une fois validee, votre soumission sera evaluee automatiquement par l&apos;IA.
-        </p>
-      </div>
-
       {/* Action Buttons */}
       <div className="flex gap-4">
         <button
