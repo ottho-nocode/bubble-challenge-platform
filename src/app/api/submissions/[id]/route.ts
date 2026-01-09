@@ -80,10 +80,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Cette soumission ne vous appartient pas' }, { status: 403 });
     }
 
-    if (submission.status !== 'pending') {
-      return NextResponse.json({ error: 'Seules les soumissions en attente peuvent etre supprimees' }, { status: 400 });
-    }
-
     // Delete associated reviews first (if any)
     const { error: reviewDeleteError } = await supabase
       .from('reviews')
