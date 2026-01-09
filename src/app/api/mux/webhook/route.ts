@@ -159,6 +159,7 @@ export async function POST(request: NextRequest) {
                 challenge_id,
                 mux_asset_id: assetId,
                 mux_playback_id: playbackId,
+                mux_upload_id: sourceUploadId || null, // Store upload ID for matching with /api/upload
                 video_url: `https://stream.mux.com/${playbackId}.m3u8`,
                 duration: Math.round(duration * 1000),
                 status: 'pending',
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest) {
             if (error) {
               console.error('Error creating submission:', error);
             } else {
-              console.log('New submission created with video:', newSubmission.id);
+              console.log('New submission created with video:', newSubmission.id, 'mux_upload_id:', sourceUploadId);
             }
           }
         }

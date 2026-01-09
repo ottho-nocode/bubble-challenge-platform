@@ -90,25 +90,30 @@ export async function POST(request: NextRequest) {
     console.log('Challenge fetch:', { challenge, challengeError, challengeId });
     console.log('AI correction enabled:', challenge?.ai_correction_enabled);
 
-    // Check if there's already a submission created by Mux webhook (has mux_asset_id)
-    // This happens when video upload completes before this endpoint is called
-    const { data: existingSubmission } = await supabase
-      .from('submissions')
-      .select('id, mux_asset_id, mux_playback_id')
-      .eq('user_id', user.id)
-      .eq('challenge_id', challengeId)
-      .eq('status', 'pending')
-      .not('mux_asset_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    // Check if there's already a submission created by Mux webhook for THIS specific recording
+    // We use mux_upload_id to match the exact recording session
+    let existingSubmission = null;
+
+    if (muxUploadId) {
+      // First, try to find by mux_upload_id (most accurate - matches this exact recording)
+      const { data: matchedSubmission } = await supabase
+        .from('submissions')
+        .select('id, mux_asset_id, mux_playback_id')
+        .eq('mux_upload_id', muxUploadId)
+        .single();
+
+      if (matchedSubmission) {
+        console.log('Found submission by mux_upload_id:', matchedSubmission.id);
+        existingSubmission = matchedSubmission;
+      }
+    }
 
     let submission;
     let insertError;
 
     if (existingSubmission) {
-      // Update existing submission created by webhook
-      console.log('Found existing submission from webhook:', existingSubmission.id);
+      // Update existing submission created by webhook for THIS recording
+      console.log('Updating existing submission from webhook:', existingSubmission.id);
       const { data: updated, error } = await supabase
         .from('submissions')
         .update({

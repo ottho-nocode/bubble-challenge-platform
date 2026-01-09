@@ -101,7 +101,7 @@ export default function ExtensionLauncher({
       });
 
       if (response?.success) {
-        setMessage('Enregistrement en cours ! Realisez le defi dans l\'onglet Bubble, puis cliquez sur l\'icone de l\'extension pour arreter.');
+        setMessage('Onglet Bubble ouvert ! Cliquez sur "Demarrer l\'enregistrement" dans le popup de l\'extension pour commencer.');
       } else {
         setMessage('Erreur: ' + (response?.error || 'Impossible de demarrer l\'enregistrement'));
       }
