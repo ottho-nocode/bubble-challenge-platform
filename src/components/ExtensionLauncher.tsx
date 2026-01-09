@@ -101,7 +101,7 @@ export default function ExtensionLauncher({
       });
 
       if (response?.success) {
-        setMessage('Onglet Bubble ouvert ! Cliquez sur "Demarrer l\'enregistrement" dans le popup de l\'extension pour commencer.');
+        setMessage('Onglet Bubble ouvert ! Cliquez sur l\'icone de l\'extension (en haut a droite de Chrome) puis sur "Demarrer l\'enregistrement".');
       } else {
         setMessage('Erreur: ' + (response?.error || 'Impossible de demarrer l\'enregistrement'));
       }
