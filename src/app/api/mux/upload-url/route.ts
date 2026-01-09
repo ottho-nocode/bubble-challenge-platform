@@ -102,9 +102,11 @@ export async function POST(request: NextRequest) {
     }, { headers: corsHeaders });
 
   } catch (error) {
-    console.error('Mux upload-url error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error('Mux upload-url error:', errorMessage, errorStack);
     return NextResponse.json(
-      { error: 'Erreur lors de la creation de l\'URL d\'upload' },
+      { error: `Erreur Mux: ${errorMessage}` },
       { status: 500, headers: corsHeaders }
     );
   }
