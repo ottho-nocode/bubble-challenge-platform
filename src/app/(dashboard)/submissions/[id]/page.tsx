@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Trophy, Robot, User, CaretLeft, CaretRight, Images } from '@phosphor-icons/react';
+import { ArrowLeft, Clock, Trophy, Robot, User, CaretLeft, CaretRight, Images, Cursor, TextT, Keyboard, ArrowsOutCardinal } from '@phosphor-icons/react';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 
 interface Screenshot {
@@ -11,8 +11,28 @@ interface Screenshot {
   data: string;
 }
 
+interface Action {
+  type: string;
+  timestamp: number;
+  x?: number;
+  y?: number;
+  element?: string;
+  text?: string;
+  tag?: string;
+  context?: string;
+  value?: string;
+  label?: string;
+  key?: string;
+  modifiers?: {
+    ctrl?: boolean;
+    meta?: boolean;
+    alt?: boolean;
+    shift?: boolean;
+  };
+}
+
 interface ActionsJson {
-  actions: Array<unknown>;
+  actions: Action[];
   screenshots: Screenshot[];
   metadata: {
     duration: number;
@@ -305,6 +325,90 @@ export default function SubmissionDetailPage({
               <p className="text-gray-600 whitespace-pre-wrap">{review.comment}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Actions Timeline */}
+      {submission.actions_json?.actions && submission.actions_json.actions.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Actions enregistrees ({submission.actions_json.actions.length})
+          </h2>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {submission.actions_json.actions.map((action, index) => {
+              const formatTime = (ms: number) => {
+                const totalSeconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+              };
+
+              const getActionIcon = (type: string) => {
+                switch (type) {
+                  case 'click':
+                    return <Cursor size={16} className="text-blue-500" />;
+                  case 'input':
+                    return <TextT size={16} className="text-green-500" />;
+                  case 'keypress':
+                    return <Keyboard size={16} className="text-purple-500" />;
+                  case 'drag':
+                    return <ArrowsOutCardinal size={16} className="text-orange-500" />;
+                  default:
+                    return <Cursor size={16} className="text-gray-500" />;
+                }
+              };
+
+              const getActionDescription = (action: Action) => {
+                switch (action.type) {
+                  case 'click':
+                    if (action.text) {
+                      return `Clic sur "${action.text.substring(0, 40)}${action.text.length > 40 ? '...' : ''}"`;
+                    }
+                    return `Clic sur ${action.tag || 'element'}`;
+                  case 'input':
+                    const label = action.label || 'champ';
+                    return `Saisie dans ${label}: "${action.value?.substring(0, 30) || ''}${(action.value?.length || 0) > 30 ? '...' : ''}"`;
+                  case 'keypress':
+                    const mods = [];
+                    if (action.modifiers?.ctrl || action.modifiers?.meta) mods.push('Cmd/Ctrl');
+                    if (action.modifiers?.alt) mods.push('Alt');
+                    if (action.modifiers?.shift) mods.push('Shift');
+                    const keyCombo = mods.length > 0 ? `${mods.join('+')}+${action.key}` : action.key;
+                    return `Touche: ${keyCombo}`;
+                  case 'drag':
+                    return `Glisser-deposer ${action.text ? `"${action.text.substring(0, 30)}"` : 'element'}`;
+                  case 'scroll':
+                    return 'Defilement';
+                  case 'navigate':
+                    return 'Navigation';
+                  default:
+                    return action.type;
+                }
+              };
+
+              return (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex-shrink-0 mt-0.5">
+                    {getActionIcon(action.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900">{getActionDescription(action)}</p>
+                    {action.context && (
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        dans: {action.context}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0 text-xs text-gray-400 font-mono">
+                    {formatTime(action.timestamp)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
