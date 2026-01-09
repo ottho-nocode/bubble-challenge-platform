@@ -13,7 +13,7 @@ interface Screenshot {
 
 interface Action {
   type: string;
-  timestamp: number;
+  t: number; // timestamp in ms relative to start
   x?: number;
   y?: number;
   element?: string;
@@ -403,7 +403,7 @@ export default function SubmissionDetailPage({
                     )}
                   </div>
                   <div className="flex-shrink-0 text-xs text-gray-400 font-mono">
-                    {formatTime(action.timestamp)}
+                    {formatTime(action.t)}
                   </div>
                 </div>
               );
