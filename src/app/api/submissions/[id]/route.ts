@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export async function GET(
   request: NextRequest,
@@ -53,6 +54,7 @@ export async function DELETE(
     const { id } = await params;
     console.log('DELETE submission request:', id);
 
+    // Use regular client for auth check
     const supabase = await createClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -63,8 +65,15 @@ export async function DELETE(
 
     console.log('DELETE user:', user.id);
 
+    // Use service role client to bypass RLS for deletion
+    const supabaseAdmin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
     // First, verify the submission exists and belongs to the user
-    const { data: submission, error: fetchError } = await supabase
+    const { data: submission, error: fetchError } = await supabaseAdmin
       .from('submissions')
       .select('id, user_id, status')
       .eq('id', id)
@@ -81,7 +90,7 @@ export async function DELETE(
     }
 
     // Delete associated reviews first (if any)
-    const { error: reviewDeleteError } = await supabase
+    const { error: reviewDeleteError } = await supabaseAdmin
       .from('reviews')
       .delete()
       .eq('submission_id', id);
@@ -90,8 +99,8 @@ export async function DELETE(
       console.log('Error deleting reviews:', reviewDeleteError);
     }
 
-    // Now delete the submission
-    const { error: deleteError } = await supabase
+    // Now delete the submission using admin client
+    const { error: deleteError } = await supabaseAdmin
       .from('submissions')
       .delete()
       .eq('id', id);
