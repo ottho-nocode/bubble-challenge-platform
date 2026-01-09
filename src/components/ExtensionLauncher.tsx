@@ -175,7 +175,7 @@ export default function ExtensionLauncher({
               Extension installee
             </h4>
             <p className="text-[#047857] text-sm mt-1">
-              L&apos;extension Bubble Recorder est prete. Cliquez sur le bouton ci-dessous pour preparer l&apos;enregistrement.
+              L&apos;extension Bubble Recorder est prete. Entrez l&apos;URL de votre app Bubble puis cliquez sur le bouton ci-dessous.
             </p>
           </div>
         </div>

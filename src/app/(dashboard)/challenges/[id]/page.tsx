@@ -150,11 +150,13 @@ export default async function ChallengePage({
                   Comment ca marche ?
                 </h3>
                 <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-                  <li>Installez l'extension Chrome si ce n'est pas deja fait</li>
-                  <li>Cliquez sur "Lancer l'enregistrement"</li>
-                  <li>Ouvrez votre application Bubble dans un autre onglet</li>
+                  <li>Installez l&apos;extension Chrome si ce n&apos;est pas deja fait</li>
+                  <li>Entrez l&apos;URL de votre application Bubble ci-dessus</li>
+                  <li>Cliquez sur &quot;Lancer l&apos;enregistrement&quot; - votre app Bubble s&apos;ouvre</li>
+                  <li><strong>Cliquez sur l&apos;icone de l&apos;extension</strong> (puzzle en haut a droite de Chrome)</li>
+                  <li>Dans le popup, cliquez sur &quot;Demarrer l&apos;enregistrement&quot;</li>
                   <li>Realisez le defi en suivant les criteres</li>
-                  <li>Cliquez sur l'icone de l'extension pour arreter</li>
+                  <li>Cliquez sur l&apos;icone de l&apos;extension puis &quot;Arreter&quot;</li>
                   <li>Validez votre soumission</li>
                 </ol>
               </div>
