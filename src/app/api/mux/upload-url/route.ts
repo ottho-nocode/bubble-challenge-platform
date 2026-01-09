@@ -76,18 +76,30 @@ export async function POST(request: NextRequest) {
 
     // Create a direct upload URL
     // The passthrough field will help us identify this upload in the webhook
-    const upload = await mux.video.uploads.create({
-      new_asset_settings: {
-        playback_policy: ['public'],
-        passthrough: JSON.stringify({
-          user_id: userId,
-          challenge_id,
-          upload_type: upload_type || 'submission',
-          timestamp: Date.now(),
-        }),
-      },
-      cors_origin: '*', // Allow upload from any origin (Chrome extension)
-    });
+    console.log('Creating Mux upload for:', { userId, challenge_id, upload_type });
+
+    let upload;
+    try {
+      upload = await mux.video.uploads.create({
+        new_asset_settings: {
+          playback_policy: ['public'],
+          passthrough: JSON.stringify({
+            user_id: userId,
+            challenge_id,
+            upload_type: upload_type || 'submission',
+            timestamp: Date.now(),
+          }),
+        },
+        cors_origin: '*', // Allow upload from any origin (Chrome extension)
+      });
+    } catch (muxError) {
+      const muxErrorMsg = muxError instanceof Error ? muxError.message : String(muxError);
+      console.error('Mux API call failed:', muxErrorMsg, muxError);
+      return NextResponse.json(
+        { error: `Mux API: ${muxErrorMsg}` },
+        { status: 500, headers: corsHeaders }
+      );
+    }
 
     console.log('Mux upload created:', {
       uploadId: upload.id,
