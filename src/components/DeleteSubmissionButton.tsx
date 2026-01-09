@@ -14,11 +14,6 @@ export default function DeleteSubmissionButton({ submissionId, status }: DeleteS
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
 
-  // Only allow deleting pending submissions
-  if (status !== 'pending') {
-    return null;
-  }
-
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
