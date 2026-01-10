@@ -87,7 +87,7 @@ export default function PrivacyPage() {
               <li>Retirer votre consentement</li>
             </ul>
             <p className="text-[#4b5563] leading-relaxed mt-3">
-              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@bubble-challenge.com" className="text-[#4a90d9] hover:underline">contact@bubble-challenge.com</a>
+              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@bubble-challenge.fr" className="text-[#4a90d9] hover:underline">contact@bubble-challenge.fr</a>
             </p>
           </section>
 
@@ -111,8 +111,8 @@ export default function PrivacyPage() {
               Pour toute question concernant cette politique de confidentialité :
             </p>
             <ul className="list-disc list-inside text-[#4b5563] space-y-1 mt-2">
-              <li>Email : <a href="mailto:contact@bubble-challenge.com" className="text-[#4a90d9] hover:underline">contact@bubble-challenge.com</a></li>
-              <li>Site web : <a href="https://bubble-challenge-platform.vercel.app" className="text-[#4a90d9] hover:underline">bubble-challenge-platform.vercel.app</a></li>
+              <li>Email : <a href="mailto:contact@bubble-challenge.fr" className="text-[#4a90d9] hover:underline">contact@bubble-challenge.fr</a></li>
+              <li>Site web : <a href="https://www.bubble-challenge.fr" className="text-[#4a90d9] hover:underline">www.bubble-challenge.fr</a></li>
             </ul>
           </section>
         </div>
