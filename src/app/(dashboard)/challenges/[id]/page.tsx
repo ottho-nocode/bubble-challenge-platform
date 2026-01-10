@@ -85,7 +85,7 @@ export default async function ChallengePage({
             {challenge.time_limit} minutes
           </span>
           <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-            {challenge.points_base} points
+            15 points max
           </span>
         </div>
       </div>

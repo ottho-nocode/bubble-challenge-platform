@@ -129,36 +129,20 @@ export default function NewChallengePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Temps limite (min)
-                </label>
-                <input
-                  type="number"
-                  value={formData.time_limit}
-                  onChange={(e) => setFormData({ ...formData, time_limit: parseInt(e.target.value) })}
-                  min={5}
-                  max={120}
-                  required
-                  className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Points de base
-                </label>
-                <input
-                  type="number"
-                  value={formData.points_base}
-                  onChange={(e) => setFormData({ ...formData, points_base: parseInt(e.target.value) })}
-                  min={5}
-                  max={100}
-                  required
-                  className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-[#101828] mb-2">
+                Temps limite (min)
+              </label>
+              <input
+                type="number"
+                value={formData.time_limit}
+                onChange={(e) => setFormData({ ...formData, time_limit: parseInt(e.target.value) })}
+                min={5}
+                max={120}
+                required
+                className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
+              />
+              <p className="text-xs text-[#6a7282] mt-1">Score max: 15 points (5 par critere)</p>
             </div>
           </div>
 

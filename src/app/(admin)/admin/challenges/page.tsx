@@ -74,7 +74,7 @@ export default async function AdminChallengesPage() {
                     {difficultyLabels[challenge.difficulty as keyof typeof difficultyLabels]}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-[#101828]">{challenge.points_base} pts</td>
+                <td className="px-6 py-4 text-[#101828]">15 pts max</td>
                 <td className="px-6 py-4 text-[#101828]">{submissionCounts?.[challenge.id] || 0}</td>
                 <td className="px-6 py-4">
                   <div className="flex flex-col gap-1">

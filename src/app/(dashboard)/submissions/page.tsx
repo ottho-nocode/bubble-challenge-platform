@@ -149,13 +149,7 @@ export default async function SubmissionsPage({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 font-semibold">
-                        <span className="text-[#6d28d9]">Score total: {totalScore}/15</span>
-                        <span className="text-[#6a7282]">+</span>
-                        <span className="text-[#6a7282]">{challenge?.points_base} pts base</span>
-                        <span className="text-[#6a7282]">=</span>
-                        <span className="text-[#22c55e]">
-                          {(totalScore || 0) + (challenge?.points_base || 0)} pts
-                        </span>
+                        <span className="text-[#22c55e]">Score: {totalScore}/15 pts</span>
                       </div>
                       {review.comment && (
                         <p className="mt-3 text-sm text-[#4a5565] bg-white rounded-lg p-3 border border-[#e5e7eb]">
