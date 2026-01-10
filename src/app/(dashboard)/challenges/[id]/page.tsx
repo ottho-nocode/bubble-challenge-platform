@@ -17,6 +17,18 @@ const difficultyLabels = {
   hard: 'Difficile',
 };
 
+const categoryLabels = {
+  web: 'Web',
+  mobile: 'Mobile',
+  both: 'Web & Mobile',
+};
+
+const categoryColors = {
+  web: 'bg-indigo-100 text-indigo-700',
+  mobile: 'bg-pink-100 text-pink-700',
+  both: 'bg-cyan-100 text-cyan-700',
+};
+
 export default async function ChallengePage({
   params,
   searchParams,
@@ -60,6 +72,15 @@ export default async function ChallengePage({
           >
             {difficultyLabels[challenge.difficulty as keyof typeof difficultyLabels]}
           </span>
+          {challenge.category && (
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                categoryColors[challenge.category as keyof typeof categoryColors]
+              }`}
+            >
+              {categoryLabels[challenge.category as keyof typeof categoryLabels]}
+            </span>
+          )}
           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
             {challenge.time_limit} minutes
           </span>
@@ -77,6 +98,37 @@ export default async function ChallengePage({
             <h2 className="font-semibold text-[#101828] mb-3">Description</h2>
             <p className="text-[#6a7282]">{challenge.description}</p>
           </div>
+
+          {/* Result Image */}
+          {challenge.result_image_url && (
+            <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
+              <h2 className="font-semibold text-[#101828] mb-3 flex items-center gap-2">
+                <span>🖼️</span>
+                Resultat attendu
+              </h2>
+              <div className="rounded-xl overflow-hidden border border-[#e5e7eb]">
+                <img
+                  src={challenge.result_image_url}
+                  alt="Resultat attendu"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Resources */}
+          {challenge.resources && (
+            <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
+              <h2 className="font-semibold text-[#101828] mb-3 flex items-center gap-2">
+                <span>📚</span>
+                Ressources
+              </h2>
+              <div
+                className="prose prose-sm max-w-none text-[#6a7282] [&_a]:text-[#6d28d9] [&_a]:underline [&_a:hover]:text-[#5b21b6]"
+                dangerouslySetInnerHTML={{ __html: challenge.resources }}
+              />
+            </div>
+          )}
 
           {/* Criteria */}
           <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">

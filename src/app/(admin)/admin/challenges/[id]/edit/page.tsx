@@ -24,10 +24,13 @@ export default function EditChallengePage() {
     description: '',
     time_limit: 30,
     difficulty: 'medium',
+    category: 'both',
     points_base: 15,
     criteria_design: '',
     criteria_functionality: '',
     criteria_completion: '',
+    result_image_url: '',
+    resources: '',
     is_active: false,
     ai_correction_enabled: false,
   });
@@ -54,10 +57,13 @@ export default function EditChallengePage() {
         description: data.description,
         time_limit: data.time_limit,
         difficulty: data.difficulty,
+        category: data.category || 'both',
         points_base: data.points_base,
         criteria_design: data.criteria_design,
         criteria_functionality: data.criteria_functionality,
         criteria_completion: data.criteria_completion,
+        result_image_url: data.result_image_url || '',
+        resources: data.resources || '',
         is_active: data.is_active,
         ai_correction_enabled: data.ai_correction_enabled || false,
       });
@@ -236,7 +242,7 @@ export default function EditChallengePage() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
                   Difficulte
@@ -252,6 +258,23 @@ export default function EditChallengePage() {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[#101828] mb-2">
+                  Categorie
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
+                >
+                  <option value="web">Web</option>
+                  <option value="mobile">Mobile</option>
+                  <option value="both">Web & Mobile</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
                   Temps limite (min)
@@ -281,6 +304,43 @@ export default function EditChallengePage() {
                   className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Result Image & Resources */}
+          <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
+            <h2 className="text-lg font-semibold text-[#101828]">Medias et ressources</h2>
+
+            <div>
+              <label className="block text-sm font-medium text-[#101828] mb-2">
+                Image du resultat attendu (URL)
+              </label>
+              <input
+                type="url"
+                value={formData.result_image_url}
+                onChange={(e) => setFormData({ ...formData, result_image_url: e.target.value })}
+                className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
+                placeholder="https://example.com/image.png (optionnel)"
+              />
+              <p className="text-xs text-[#6a7282] mt-1">Laissez vide si pas d&apos;image de reference</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#101828] mb-2">
+                Ressources (HTML)
+              </label>
+              <textarea
+                value={formData.resources}
+                onChange={(e) => setFormData({ ...formData, resources: e.target.value })}
+                rows={4}
+                className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none resize-none font-mono"
+                placeholder='<p>Voici quelques ressources utiles :</p>
+<ul>
+  <li><a href="https://...">Documentation Bubble</a></li>
+  <li><a href="https://...">Tutoriel video</a></li>
+</ul>'
+              />
+              <p className="text-xs text-[#6a7282] mt-1">Vous pouvez utiliser du HTML pour formater le texte et ajouter des liens</p>
             </div>
           </div>
 
