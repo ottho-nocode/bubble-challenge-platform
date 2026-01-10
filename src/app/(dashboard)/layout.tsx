@@ -60,9 +60,7 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-b from-[#4a90d9] to-[#001354] rounded-lg flex items-center justify-center">
-              <span className="text-white text-xl font-bold">B</span>
-            </div>
+            <img src="/logo.svg" alt="Bubble Challenge" className="w-10 h-10" />
             <div>
               <span className="text-[#101828] font-semibold text-sm block leading-tight">Bubble</span>
               <span className="text-[#101828] font-semibold text-sm block leading-tight">Challenge</span>

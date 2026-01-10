@@ -57,9 +57,7 @@ export default function RegisterPage() {
         <div className="bg-white rounded-[24px] shadow-[0px_4px_24px_rgba(0,0,0,0.08)] p-8 pb-6">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="w-14 h-14 bg-[#001354] rounded-[16px] flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">B</span>
-            </div>
+            <img src="/logo.svg" alt="Bubble Challenge" className="w-14 h-14" />
           </div>
 
           {/* Title */}

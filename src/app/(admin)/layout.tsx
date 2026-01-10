@@ -83,9 +83,7 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="p-6">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-              <GearSix size={24} className="text-[#001354]" weight="fill" />
-            </div>
+            <img src="/logo.svg" alt="Bubble Challenge" className="w-10 h-10" />
             <div>
               <span className="text-white font-semibold text-sm block leading-tight">Admin</span>
               <span className="text-white/70 text-xs block leading-tight">Bubble Challenge</span>
