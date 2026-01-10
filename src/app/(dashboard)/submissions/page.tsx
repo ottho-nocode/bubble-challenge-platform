@@ -28,42 +28,46 @@ export default async function SubmissionsPage({
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Get total count
-  const { count: totalCount } = await supabase
-    .from('submissions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user?.id);
+  // Parallelize count and data queries
+  const [countResult, submissionsResult] = await Promise.all([
+    supabase
+      .from('submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user?.id),
 
+    supabase
+      .from('submissions')
+      .select(`
+        id,
+        status,
+        created_at,
+        duration,
+        mux_playback_id,
+        video_url,
+        actions_json,
+        challenges (
+          title,
+          difficulty,
+          points_base,
+          ai_correction_enabled
+        ),
+        reviews (
+          score_design,
+          score_functionality,
+          score_completion,
+          comment,
+          feedback_video_url,
+          is_ai_review
+        )
+      `)
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + ITEMS_PER_PAGE - 1),
+  ]);
+
+  const totalCount = countResult.count;
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
-
-  const { data: submissions } = await supabase
-    .from('submissions')
-    .select(`
-      id,
-      status,
-      created_at,
-      duration,
-      mux_playback_id,
-      video_url,
-      actions_json,
-      challenges (
-        title,
-        difficulty,
-        points_base,
-        ai_correction_enabled
-      ),
-      reviews (
-        score_design,
-        score_functionality,
-        score_completion,
-        comment,
-        feedback_video_url,
-        is_ai_review
-      )
-    `)
-    .eq('user_id', user?.id)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + ITEMS_PER_PAGE - 1);
+  const submissions = submissionsResult.data;
 
   return (
     <div className="p-8">

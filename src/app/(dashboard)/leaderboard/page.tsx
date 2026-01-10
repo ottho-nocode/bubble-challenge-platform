@@ -1,14 +1,28 @@
 import { createClient } from '@/lib/supabase/server';
+import { unstable_cache } from 'next/cache';
+
+// Cache leaderboard data for 30 seconds
+const getLeaderboard = unstable_cache(
+  async () => {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('leaderboard')
+      .select('*')
+      .limit(50);
+    return data;
+  },
+  ['leaderboard'],
+  { revalidate: 30 }
+);
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { data: leaderboard } = await supabase
-    .from('leaderboard')
-    .select('*')
-    .limit(50);
+  // Parallelize user auth and leaderboard fetch
+  const [{ data: { user } }, leaderboard] = await Promise.all([
+    supabase.auth.getUser(),
+    getLeaderboard(),
+  ]);
 
   return (
     <div className="p-8">

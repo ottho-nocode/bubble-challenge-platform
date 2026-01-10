@@ -19,42 +19,50 @@ export default async function ReviewPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Get pending submissions from other users
-  const { data: submissions } = await supabase
-    .from('submissions')
-    .select(`
-      *,
-      challenges (
-        title,
-        description,
-        difficulty,
-        points_base,
-        time_limit,
-        criteria_design,
-        criteria_functionality,
-        criteria_completion
-      ),
-      profiles (
-        username
-      )
-    `)
-    .eq('status', 'pending')
-    .neq('user_id', user?.id)
-    .order('created_at', { ascending: true })
-    .limit(10);
+  // Parallelize all queries for better performance
+  const [submissionsResult, pendingCountResult, profileResult] = await Promise.all([
+    // Get pending submissions from other users
+    supabase
+      .from('submissions')
+      .select(`
+        *,
+        challenges (
+          title,
+          description,
+          difficulty,
+          points_base,
+          time_limit,
+          criteria_design,
+          criteria_functionality,
+          criteria_completion
+        ),
+        profiles (
+          username
+        )
+      `)
+      .eq('status', 'pending')
+      .neq('user_id', user?.id)
+      .order('created_at', { ascending: true })
+      .limit(10),
 
-  // Get stats
-  const { count: totalPending } = await supabase
-    .from('submissions')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-    .neq('user_id', user?.id);
+    // Get stats
+    supabase
+      .from('submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .neq('user_id', user?.id),
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('reviews_count')
-    .eq('id', user?.id)
-    .single();
+    // Get user profile
+    supabase
+      .from('profiles')
+      .select('reviews_count')
+      .eq('id', user?.id)
+      .single(),
+  ]);
+
+  const submissions = submissionsResult.data;
+  const totalPending = pendingCountResult.count;
+  const profile = profileResult.data;
 
   return (
     <div className="p-8">
