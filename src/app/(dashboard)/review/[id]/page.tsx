@@ -152,7 +152,7 @@ export default function ReviewDetailPage({
         className="inline-flex items-center gap-2 text-[#6a7282] hover:text-[#101828] mb-6 text-sm font-medium transition-colors"
       >
         <ArrowLeft size={16} />
-        Retour a la liste
+        Retour à la liste
       </Link>
 
       {/* Main Content - Two Columns */}
@@ -176,7 +176,7 @@ export default function ReviewDetailPage({
                     Soumission par {submission?.profiles?.username}
                   </h2>
                   <p className="text-[#d1d5dc] text-sm">
-                    Defi: {submission?.challenges?.title}
+                    Défi: {submission?.challenges?.title}
                   </p>
                 </div>
               </>
@@ -210,7 +210,7 @@ export default function ReviewDetailPage({
                       Soumission par {submission?.profiles?.username}
                     </h2>
                     <p className="text-[#d1d5dc] font-medium">
-                      Defi: {submission?.challenges?.title}
+                      Défi: {submission?.challenges?.title}
                     </p>
                   </div>
                   {submission?.duration && (
@@ -224,7 +224,7 @@ export default function ReviewDetailPage({
               </>
             ) : (
               <div className="aspect-video flex items-center justify-center">
-                <p className="text-gray-400">Aucune video disponible</p>
+                <p className="text-gray-400">Aucune vidéo disponible</p>
               </div>
             )}
           </div>
@@ -234,26 +234,26 @@ export default function ReviewDetailPage({
             <div className="flex items-center gap-2 mb-4">
               <Info size={20} className="text-[#6d28d9]" />
               <h3 className="text-lg font-semibold text-[#020618] tracking-tight">
-                Rappel des criteres
+                Rappel des critères
               </h3>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-[#f9fafb] border border-[#f3f4f6] rounded-[14px] p-4">
                 <p className="font-bold text-[#101828] text-sm mb-2">Design</p>
                 <p className="text-[#4a5565] text-sm leading-relaxed">
-                  {submission?.challenges?.criteria_design || "L'interface doit etre claire, responsive et respecter les conventions UX."}
+                  {submission?.challenges?.criteria_design || "L'interface doit être claire, responsive et respecter les conventions UX."}
                 </p>
               </div>
               <div className="bg-[#f9fafb] border border-[#f3f4f6] rounded-[14px] p-4">
-                <p className="font-bold text-[#101828] text-sm mb-2">Fonctionnalites</p>
+                <p className="font-bold text-[#101828] text-sm mb-2">Fonctionnalités</p>
                 <p className="text-[#4a5565] text-sm leading-relaxed">
-                  {submission?.challenges?.criteria_functionality || "La recherche doit fonctionner, ainsi que le filtrage par categorie."}
+                  {submission?.challenges?.criteria_functionality || "La recherche doit fonctionner, ainsi que le filtrage par catégorie."}
                 </p>
               </div>
               <div className="bg-[#f9fafb] border border-[#f3f4f6] rounded-[14px] p-4">
-                <p className="font-bold text-[#101828] text-sm mb-2">Realisation</p>
+                <p className="font-bold text-[#101828] text-sm mb-2">Réalisation</p>
                 <p className="text-[#4a5565] text-sm leading-relaxed">
-                  {submission?.challenges?.criteria_completion || "Toutes les pages demandees doivent etre presentes."}
+                  {submission?.challenges?.criteria_completion || "Toutes les pages demandées doivent être présentes."}
                 </p>
               </div>
             </div>
@@ -269,10 +269,10 @@ export default function ReviewDetailPage({
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <h2 className="text-xl font-bold text-white">Evaluation</h2>
+                <h2 className="text-xl font-bold text-white">Évaluation</h2>
               </div>
               <p className="text-[#e9d4ff] text-sm">
-                Notez objectivement le travail realise.
+                Notez objectivement le travail réalisé.
               </p>
             </div>
 
@@ -311,7 +311,7 @@ export default function ReviewDetailPage({
               {/* Functionality Slider */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <label className="font-bold text-[#364153]">Fonctionnalites</label>
+                  <label className="font-bold text-[#364153]">Fonctionnalités</label>
                   <span className="bg-[#faf5ff] text-[#6d28d9] font-bold px-3 py-1 rounded-xl text-sm">
                     {scoreFunctionality.toFixed(1)}/5
                   </span>
@@ -335,7 +335,7 @@ export default function ReviewDetailPage({
               {/* Completion Slider */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <label className="font-bold text-[#364153]">Realisation</label>
+                  <label className="font-bold text-[#364153]">Réalisation</label>
                   <span className="bg-[#faf5ff] text-[#6d28d9] font-bold px-3 py-1 rounded-xl text-sm">
                     {scoreCompletion.toFixed(1)}/5
                   </span>
@@ -393,7 +393,7 @@ export default function ReviewDetailPage({
                 disabled={submitting}
                 className="w-full bg-[#6d28d9] text-white py-4 rounded-[14px] font-medium text-lg hover:bg-[#5b21b6] disabled:opacity-50 transition-colors shadow-lg"
               >
-                {submitting ? 'Envoi en cours...' : "Soumettre l'evaluation"}
+                {submitting ? 'Envoi en cours...' : "Soumettre l'évaluation"}
               </button>
             </div>
           </form>

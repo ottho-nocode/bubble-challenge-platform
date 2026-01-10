@@ -56,7 +56,7 @@ export default async function ChallengePage({
         href="/challenges"
         className="text-blue-600 hover:underline mb-6 inline-block"
       >
-        &larr; Retour aux defis
+        &larr; Retour aux défis
       </Link>
 
       {/* Header */}
@@ -104,12 +104,12 @@ export default async function ChallengePage({
             <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
               <h2 className="font-semibold text-[#101828] mb-3 flex items-center gap-2">
                 <span>🖼️</span>
-                Resultat attendu
+                Résultat attendu
               </h2>
               <div className="rounded-xl overflow-hidden border border-[#e5e7eb]">
                 <img
                   src={challenge.result_image_url}
-                  alt="Resultat attendu"
+                  alt="Résultat attendu"
                   className="w-full h-auto"
                 />
               </div>
@@ -133,7 +133,7 @@ export default async function ChallengePage({
           {/* Criteria */}
           <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
             <h2 className="font-semibold text-[#101828] mb-4">
-              Criteres de notation
+              Critères de notation
             </h2>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-[#f9fafb] p-4 rounded-xl">
@@ -147,7 +147,7 @@ export default async function ChallengePage({
               <div className="bg-[#f9fafb] p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <span>⚙️</span>
-                  <span className="font-medium text-[#101828]">Fonctionnalites</span>
+                  <span className="font-medium text-[#101828]">Fonctionnalités</span>
                   <span className="text-sm text-[#6a7282]">(0-5 pts)</span>
                 </div>
                 <p className="text-sm text-[#6a7282]">{challenge.criteria_functionality}</p>
@@ -155,7 +155,7 @@ export default async function ChallengePage({
               <div className="bg-[#f9fafb] p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <span>✅</span>
-                  <span className="font-medium text-[#101828]">Realisation</span>
+                  <span className="font-medium text-[#101828]">Réalisation</span>
                   <span className="text-sm text-[#6a7282]">(0-5 pts)</span>
                 </div>
                 <p className="text-sm text-[#6a7282]">{challenge.criteria_completion}</p>
@@ -168,10 +168,10 @@ export default async function ChallengePage({
             <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
               <h3 className="font-semibold text-[#101828] mb-3 flex items-center gap-2">
                 <span>🎬</span>
-                Video de reference
+                Vidéo de référence
               </h3>
               <p className="text-sm text-[#6a7282] mb-4">
-                Regardez cette video pour comprendre le resultat attendu.
+                Regardez cette vidéo pour comprendre le résultat attendu.
               </p>
               <MuxVideoPlayer
                 playbackId={challenge.reference_video_playback_id}
@@ -193,7 +193,7 @@ export default async function ChallengePage({
             <>
               <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
                 <h2 className="text-lg font-semibold text-[#101828] mb-4">
-                  Commencer le defi
+                  Commencer le défi
                 </h2>
                 <ExtensionLauncher
                   challengeId={id}
@@ -203,15 +203,15 @@ export default async function ChallengePage({
 
               <div className="bg-blue-50 border border-blue-200 rounded-[16px] p-5">
                 <h3 className="font-medium text-blue-900 mb-3">
-                  Comment ca marche ?
+                  Comment ça marche ?
                 </h3>
                 <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
                   <li>Installez l&apos;extension Chrome</li>
                   <li>Entrez l&apos;URL de votre app Bubble</li>
                   <li>Cliquez sur &quot;Lancer l&apos;enregistrement&quot;</li>
-                  <li><strong>Cliquez sur l&apos;icone de l&apos;extension</strong></li>
-                  <li>Cliquez sur &quot;Demarrer&quot;</li>
-                  <li>Realisez le defi</li>
+                  <li><strong>Cliquez sur l&apos;icône de l&apos;extension</strong></li>
+                  <li>Cliquez sur &quot;Démarrer&quot;</li>
+                  <li>Réalisez le défi</li>
                   <li>Cliquez sur le bouton Stop</li>
                 </ol>
               </div>

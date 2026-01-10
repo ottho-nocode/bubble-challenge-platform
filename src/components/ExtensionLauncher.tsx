@@ -88,7 +88,7 @@ export default function ExtensionLauncher({
     try {
       const returnUrl = `${window.location.origin}/submissions`;
 
-      setMessage('Ouverture de votre application Bubble et demarrage de l\'enregistrement...');
+      setMessage('Ouverture de votre application Bubble et démarrage de l\'enregistrement...');
 
       const response = await sendMessageToExtension({
         type: 'START_RECORDING_ON_URL',
@@ -101,13 +101,13 @@ export default function ExtensionLauncher({
       });
 
       if (response?.success) {
-        setMessage('Onglet Bubble ouvert ! Cliquez sur l\'icone de l\'extension (en haut a droite de Chrome) puis sur "Demarrer l\'enregistrement".');
+        setMessage('Onglet Bubble ouvert ! Cliquez sur l\'icône de l\'extension (en haut à droite de Chrome) puis sur "Démarrer l\'enregistrement".');
       } else {
-        setMessage('Erreur: ' + (response?.error || 'Impossible de demarrer l\'enregistrement'));
+        setMessage('Erreur: ' + (response?.error || 'Impossible de démarrer l\'enregistrement'));
       }
     } catch (error) {
       console.error('Error starting recording:', error);
-      setMessage('Erreur de communication avec l\'extension. Rechargez la page et reessayez.');
+      setMessage('Erreur de communication avec l\'extension. Rechargez la page et réessayez.');
     }
 
     setIsPreparing(false);
@@ -118,7 +118,7 @@ export default function ExtensionLauncher({
       <div className="bg-[#f9fafb] rounded-[16px] p-5">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#6d28d9]"></div>
-          <span className="text-[#6a7282]">Verification de l&apos;extension...</span>
+          <span className="text-[#6a7282]">Vérification de l&apos;extension...</span>
         </div>
       </div>
     );
@@ -158,7 +158,7 @@ export default function ExtensionLauncher({
           onClick={checkExtension}
           className="w-full text-[#6a7282] text-sm hover:text-[#101828] transition-colors"
         >
-          Reverifier l&apos;installation
+          Revérifier l&apos;installation
         </button>
       </div>
     );
@@ -172,10 +172,10 @@ export default function ExtensionLauncher({
           <CheckCircle size={20} weight="fill" className="text-[#059669] flex-shrink-0 mt-0.5" />
           <div>
             <h4 className="font-semibold text-[#059669] text-sm">
-              Extension installee
+              Extension installée
             </h4>
             <p className="text-[#047857] text-sm mt-1">
-              L&apos;extension Bubble Recorder est prete. Entrez l&apos;URL de votre app Bubble puis cliquez sur le bouton ci-dessous.
+              L&apos;extension Bubble Recorder est prête. Entrez l&apos;URL de votre app Bubble puis cliquez sur le bouton ci-dessous.
             </p>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function ExtensionLauncher({
           />
         </div>
         <p className="text-xs text-[#6a7282] mt-2">
-          Partagez votre app en mode &quot;Everyone can edit&quot; dans les parametres Bubble.
+          Partagez votre app en mode &quot;Everyone can edit&quot; dans les paramètres Bubble.
         </p>
       </div>
 
@@ -216,7 +216,7 @@ export default function ExtensionLauncher({
         className="flex items-center justify-center gap-2 w-full bg-[#6d28d9] text-white py-3 px-4 rounded-[9px] font-medium hover:bg-[#5b21b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <span className="w-2 h-2 rounded-full bg-white"></span>
-        {isPreparing ? 'Preparation...' : 'Lancer l\'enregistrement'}
+        {isPreparing ? 'Préparation...' : 'Lancer l\'enregistrement'}
       </button>
     </div>
   );

@@ -5,7 +5,7 @@ import { formatDateTime } from '@/lib/utils/date';
 
 const statusLabels = {
   pending: 'En attente',
-  reviewed: 'Corrige',
+  reviewed: 'Corrigé',
 };
 
 const statusColors = {
@@ -69,7 +69,7 @@ export default async function SubmissionsPage({
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#101828]">Mes soumissions</h1>
-        <p className="text-[#6a7282] mt-1">Historique de vos defis realises</p>
+        <p className="text-[#6a7282] mt-1">Historique de vos défis réalisés</p>
       </div>
 
       <div className="space-y-4">
@@ -88,7 +88,7 @@ export default async function SubmissionsPage({
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-semibold text-[#101828]">
-                      {challenge?.title || 'Defi inconnu'}
+                      {challenge?.title || 'Défi inconnu'}
                     </h2>
                     {isPendingAi ? (
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#faf5ff] text-[#6d28d9] flex items-center gap-2">
@@ -111,7 +111,7 @@ export default async function SubmissionsPage({
                     Soumis le {formatDateTime(submission.created_at)}
                     {submission.duration && (
                       <span className="ml-2">
-                        - Duree: {Math.round(submission.duration / 1000 / 60)} min
+                        - Durée : {Math.round(submission.duration / 1000 / 60)} min
                       </span>
                     )}
                   </p>
@@ -125,7 +125,7 @@ export default async function SubmissionsPage({
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                             </svg>
-                            Corrige par IA
+                            Corrigé par IA
                           </span>
                         )}
                       </div>
@@ -135,11 +135,11 @@ export default async function SubmissionsPage({
                           <div className="font-bold text-[#101828]">{review.score_design}/5</div>
                         </div>
                         <div>
-                          <span className="text-sm text-[#6a7282]">Fonctionnalites</span>
+                          <span className="text-sm text-[#6a7282]">Fonctionnalités</span>
                           <div className="font-bold text-[#101828]">{review.score_functionality}/5</div>
                         </div>
                         <div>
-                          <span className="text-sm text-[#6a7282]">Realisation</span>
+                          <span className="text-sm text-[#6a7282]">Réalisation</span>
                           <div className="font-bold text-[#101828]">{review.score_completion}/5</div>
                         </div>
                       </div>
@@ -161,7 +161,7 @@ export default async function SubmissionsPage({
                       href={`/submissions/${submission.id}`}
                       className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-xl text-sm font-medium hover:bg-[#e5e7eb] transition-colors text-center"
                     >
-                      Voir ma video
+                      Voir ma vidéo
                     </Link>
                   ) : submission.actions_json?.screenshots?.length > 0 ? (
                     <Link
@@ -202,13 +202,13 @@ export default async function SubmissionsPage({
               Aucune soumission
             </h3>
             <p className="text-[#6a7282] mb-6">
-              Vous n&apos;avez pas encore soumis de defi.
+              Vous n&apos;avez pas encore soumis de défi.
             </p>
             <Link
               href="/challenges"
               className="inline-flex items-center gap-2 bg-[#001354] text-white px-5 py-3 rounded-xl font-medium hover:bg-[#001354]/90 transition-colors"
             >
-              Voir les defis
+              Voir les défis
             </Link>
           </div>
         )}
@@ -225,7 +225,7 @@ export default async function SubmissionsPage({
                   href={`/submissions?page=${currentPage - 1}`}
                   className="px-4 py-2 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-sm font-medium hover:bg-[#e5e7eb] transition-colors"
                 >
-                  Precedent
+                  Précédent
                 </Link>
               )}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {

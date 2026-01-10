@@ -96,7 +96,7 @@ export default function WebRecorder({
       }
 
       if (!selectedMimeType) {
-        throw new Error('Aucun format video supporte par ce navigateur');
+        throw new Error('Aucun format vidéo supporté par ce navigateur');
       }
 
       console.log('Using mimeType:', selectedMimeType);
@@ -149,7 +149,7 @@ export default function WebRecorder({
 
     } catch (err) {
       console.error('Error starting recording:', err);
-      setError('Impossible de demarrer l\'enregistrement. Verifiez les permissions.');
+      setError('Impossible de démarrer l\'enregistrement. Vérifiez les permissions.');
     }
   };
 
@@ -214,7 +214,7 @@ export default function WebRecorder({
       }
     } catch (err) {
       console.error('Upload error:', err);
-      setError('Erreur lors de l\'envoi. Reessayez.');
+      setError('Erreur lors de l\'envoi. Réessayez.');
       setStatus('preview');
     }
   };
@@ -256,7 +256,7 @@ export default function WebRecorder({
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="mt-2 text-sm text-gray-500">
-              Assurez-vous que votre application est configuree en <strong>"Everyone can edit"</strong> dans les parametres de partage Bubble.
+              Assurez-vous que votre application est configurée en <strong>"Everyone can edit"</strong> dans les paramètres de partage Bubble.
             </p>
           </div>
 
@@ -264,10 +264,10 @@ export default function WebRecorder({
             <h3 className="font-medium text-blue-900 mb-2">Instructions</h3>
             <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
               <li>Ouvrez votre application Bubble dans un autre onglet</li>
-              <li>Cliquez sur "Demarrer l'enregistrement" ci-dessous</li>
-              <li>Selectionnez l'onglet Bubble a partager</li>
-              <li>Realisez le defi dans le temps imparti ({timeLimit} min)</li>
-              <li>Cliquez sur "Arreter" quand vous avez termine</li>
+              <li>Cliquez sur "Démarrer l'enregistrement" ci-dessous</li>
+              <li>Sélectionnez l'onglet Bubble à partager</li>
+              <li>Réalisez le défi dans le temps imparti ({timeLimit} min)</li>
+              <li>Cliquez sur "Arrêter" quand vous avez terminé</li>
             </ol>
           </div>
 
@@ -276,7 +276,7 @@ export default function WebRecorder({
             className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 flex items-center justify-center gap-2"
           >
             <span className="text-xl">&#9679;</span>
-            Demarrer l'enregistrement
+            Démarrer l'enregistrement
           </button>
         </div>
       )}
@@ -294,13 +294,13 @@ export default function WebRecorder({
                 {formatTime(duration)}
               </div>
               <div className={`text-sm ${isOverTime ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
-                {isOverTime ? 'Temps depasse!' : `${formatTime(remainingTime)} restant`}
+                {isOverTime ? 'Temps dépassé!' : `${formatTime(remainingTime)} restant`}
               </div>
             </div>
           </div>
 
           <p className="text-sm text-gray-600 text-center">
-            Realisez le defi "<strong>{challengeTitle}</strong>" puis cliquez sur Arreter.
+            Réalisez le défi "<strong>{challengeTitle}</strong>" puis cliquez sur Arrêter.
           </p>
 
           <button
@@ -308,7 +308,7 @@ export default function WebRecorder({
             className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 flex items-center justify-center gap-2"
           >
             <span className="text-xl">&#9632;</span>
-            Arreter l'enregistrement
+            Arrêter l'enregistrement
           </button>
         </div>
       )}
@@ -325,8 +325,8 @@ export default function WebRecorder({
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>Duree: {formatTime(duration)}</span>
-            <span>{isOverTime && '(Temps depasse)'}</span>
+            <span>Durée: {formatTime(duration)}</span>
+            <span>{isOverTime && '(Temps dépassé)'}</span>
           </div>
 
           <div className="flex gap-3">
@@ -361,10 +361,10 @@ export default function WebRecorder({
             <span className="text-3xl text-green-600">&#10003;</span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Soumission envoyee !
+            Soumission envoyée !
           </h3>
           <p className="text-gray-600 mb-4">
-            Votre travail sera evalue par d'autres etudiants.
+            Votre travail sera évalué par d'autres étudiants.
           </p>
           <a
             href="/submissions"

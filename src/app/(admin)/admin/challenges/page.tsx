@@ -38,14 +38,14 @@ export default async function AdminChallengesPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#101828]">Gestion des defis</h1>
-          <p className="text-[#6a7282] mt-1">Creez, modifiez et publiez vos defis</p>
+          <h1 className="text-3xl font-bold text-[#101828]">Gestion des défis</h1>
+          <p className="text-[#6a7282] mt-1">Créez, modifiez et publiez vos défis</p>
         </div>
         <Link
           href="/admin/challenges/new"
           className="bg-[#001354] text-white px-5 py-3 rounded-xl font-medium hover:bg-[#001354]/90 transition-colors"
         >
-          + Nouveau defi
+          + Nouveau défi
         </Link>
       </div>
 
@@ -54,8 +54,8 @@ export default async function AdminChallengesPage() {
         <table className="w-full">
           <thead className="bg-[#f9fafb] border-b border-[#e5e7eb]">
             <tr>
-              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Defi</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Difficulte</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Défi</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Difficulté</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Points</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Soumissions</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Statut</th>
@@ -84,7 +84,7 @@ export default async function AdminChallengesPage() {
                           ? 'bg-green-100 text-green-700'
                           : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {challenge.is_active ? 'Publie' : 'Brouillon'}
+                        {challenge.is_active ? 'Publié' : 'Brouillon'}
                       </span>
                       {challenge.ai_correction_enabled && (
                         <span className="px-2 py-1 bg-[#faf5ff] text-[#6d28d9] text-xs font-medium rounded-full">
@@ -99,8 +99,8 @@ export default async function AdminChallengesPage() {
                           : 'text-orange-500'
                       }`}>
                         {challenge.reference_actions_json
-                          ? '✓ Reference enregistree'
-                          : '⚠ Reference manquante'}
+                          ? '✓ Référence enregistrée'
+                          : '⚠ Référence manquante'}
                       </span>
                     )}
                   </div>
@@ -115,12 +115,12 @@ export default async function AdminChallengesPage() {
 
         {(!challenges || challenges.length === 0) && (
           <div className="p-12 text-center">
-            <p className="text-[#6a7282] mb-4">Aucun defi pour le moment</p>
+            <p className="text-[#6a7282] mb-4">Aucun défi pour le moment</p>
             <Link
               href="/admin/challenges/new"
               className="inline-block bg-[#001354] text-white px-5 py-3 rounded-xl font-medium hover:bg-[#001354]/90 transition-colors"
             >
-              Creer votre premier defi
+              Créer votre premier défi
             </Link>
           </div>
         )}

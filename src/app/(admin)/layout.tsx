@@ -15,7 +15,7 @@ import {
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: House },
-  { href: '/admin/challenges', label: 'Defis', icon: ListChecks },
+  { href: '/admin/challenges', label: 'Défis', icon: ListChecks },
   { href: '/admin/submissions', label: 'Soumissions', icon: FileText },
   { href: '/admin/users', label: 'Utilisateurs', icon: Users },
 ];
@@ -125,14 +125,14 @@ export default function AdminLayout({
             className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white rounded-lg text-sm font-medium transition-colors"
           >
             <House size={20} />
-            <span>Retour a l&apos;app</span>
+            <span>Retour à l&apos;app</span>
           </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg text-sm font-medium transition-colors"
           >
             <SignOut size={20} />
-            <span>Deconnexion</span>
+            <span>Déconnexion</span>
           </button>
         </div>
       </aside>

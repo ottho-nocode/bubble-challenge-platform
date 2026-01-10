@@ -30,7 +30,7 @@ export default function MuxVideoPlayer({
   if (!playbackId) {
     return (
       <div className={`bg-gray-900 rounded-xl flex items-center justify-center aspect-video ${className}`}>
-        <p className="text-gray-400">Aucune video disponible</p>
+        <p className="text-gray-400">Aucune vidéo disponible</p>
       </div>
     );
   }

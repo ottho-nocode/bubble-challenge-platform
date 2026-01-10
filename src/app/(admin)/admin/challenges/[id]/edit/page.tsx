@@ -201,12 +201,12 @@ export default function EditChallengePage() {
         className="inline-flex items-center gap-2 text-[#6a7282] hover:text-[#101828] mb-6"
       >
         <ArrowLeft size={20} />
-        Retour aux defis
+        Retour aux défis
       </Link>
 
       <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold text-[#101828] mb-2">Modifier le defi</h1>
-        <p className="text-[#6a7282] mb-8">Modifiez les informations du defi</p>
+        <h1 className="text-3xl font-bold text-[#101828] mb-2">Modifier le défi</h1>
+        <p className="text-[#6a7282] mb-8">Modifiez les informations du défi</p>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl">
@@ -218,7 +218,7 @@ export default function EditChallengePage() {
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Titre du defi
+                Titre du défi
               </label>
               <input
                 type="text"
@@ -245,7 +245,7 @@ export default function EditChallengePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Difficulte
+                  Difficulté
                 </label>
                 <select
                   value={formData.difficulty}
@@ -260,7 +260,7 @@ export default function EditChallengePage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Categorie
+                  Catégorie
                 </label>
                 <select
                   value={formData.category}
@@ -287,17 +287,17 @@ export default function EditChallengePage() {
                 required
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
               />
-              <p className="text-xs text-[#6a7282] mt-1">Score max: 15 points (5 par critere)</p>
+              <p className="text-xs text-[#6a7282] mt-1">Score max: 15 points (5 par critère)</p>
             </div>
           </div>
 
           {/* Result Image & Resources */}
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
-            <h2 className="text-lg font-semibold text-[#101828]">Medias et ressources</h2>
+            <h2 className="text-lg font-semibold text-[#101828]">Médias et ressources</h2>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Image du resultat attendu (URL)
+                Image du résultat attendu (URL)
               </label>
               <input
                 type="url"
@@ -306,7 +306,7 @@ export default function EditChallengePage() {
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
                 placeholder="https://example.com/image.png (optionnel)"
               />
-              <p className="text-xs text-[#6a7282] mt-1">Laissez vide si pas d&apos;image de reference</p>
+              <p className="text-xs text-[#6a7282] mt-1">Laissez vide si pas d&apos;image de référence</p>
             </div>
 
             <div>
@@ -321,7 +321,7 @@ export default function EditChallengePage() {
                 placeholder='<p>Voici quelques ressources utiles :</p>
 <ul>
   <li><a href="https://...">Documentation Bubble</a></li>
-  <li><a href="https://...">Tutoriel video</a></li>
+  <li><a href="https://...">Tutoriel vidéo</a></li>
 </ul>'
               />
               <p className="text-xs text-[#6a7282] mt-1">Vous pouvez utiliser du HTML pour formater le texte et ajouter des liens</p>
@@ -330,11 +330,11 @@ export default function EditChallengePage() {
 
           {/* Criteria */}
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
-            <h2 className="text-lg font-semibold text-[#101828]">Criteres d&apos;evaluation</h2>
+            <h2 className="text-lg font-semibold text-[#101828]">Critères d&apos;évaluation</h2>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Design
+                Critère Design
               </label>
               <textarea
                 value={formData.criteria_design}
@@ -347,7 +347,7 @@ export default function EditChallengePage() {
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Fonctionnalites
+                Critère Fonctionnalités
               </label>
               <textarea
                 value={formData.criteria_functionality}
@@ -360,7 +360,7 @@ export default function EditChallengePage() {
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Realisation
+                Critère Réalisation
               </label>
               <textarea
                 value={formData.criteria_completion}
@@ -382,8 +382,8 @@ export default function EditChallengePage() {
                 className="w-5 h-5 rounded border-[#e5e7eb] text-[#001354] focus:ring-[#4a90d9]"
               />
               <div>
-                <p className="font-medium text-[#101828]">Publie</p>
-                <p className="text-sm text-[#6a7282]">Le defi est visible par les eleves</p>
+                <p className="font-medium text-[#101828]">Publié</p>
+                <p className="text-sm text-[#6a7282]">Le défi est visible par les élèves</p>
               </div>
             </label>
 
@@ -402,7 +402,7 @@ export default function EditChallengePage() {
                       Beta
                     </span>
                   </div>
-                  <p className="text-sm text-[#6a7282]">Les soumissions seront automatiquement corrigees par l&apos;IA</p>
+                  <p className="text-sm text-[#6a7282]">Les soumissions seront automatiquement corrigées par l&apos;IA</p>
                 </div>
               </label>
             </div>
@@ -412,10 +412,10 @@ export default function EditChallengePage() {
               <div className="border-t border-[#e5e7eb] pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <VideoCamera size={20} className="text-[#6d28d9]" />
-                  <p className="font-medium text-[#101828]">Video de reference</p>
+                  <p className="font-medium text-[#101828]">Vidéo de référence</p>
                 </div>
                 <p className="text-sm text-[#6a7282] mb-4">
-                  Uploadez une video montrant la solution attendue. L&apos;IA comparera les soumissions des eleves a cette reference.
+                  Uploadez une vidéo montrant la solution attendue. L&apos;IA comparera les soumissions des élèves à cette référence.
                 </p>
 
                 {referenceStatus.hasReference ? (
@@ -424,8 +424,8 @@ export default function EditChallengePage() {
                       <div className="flex items-center gap-3">
                         <CheckCircle size={24} className="text-[#22c55e]" weight="fill" />
                         <div>
-                          <p className="font-medium text-[#166534]">Reference enregistree</p>
-                          <p className="text-sm text-[#15803d]">La video de reference est prete</p>
+                          <p className="font-medium text-[#166534]">Référence enregistrée</p>
+                          <p className="text-sm text-[#15803d]">La vidéo de référence est prête</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -462,7 +462,7 @@ export default function EditChallengePage() {
                     />
                     <Upload size={32} className="mx-auto text-[#9ca3af] mb-3" />
                     <p className="text-sm text-[#6a7282] mb-3">
-                      Glissez une video ou cliquez pour uploader
+                      Glissez une vidéo ou cliquez pour uploader
                     </p>
                     <label
                       htmlFor="reference-video-input"
@@ -476,12 +476,12 @@ export default function EditChallengePage() {
                       ) : (
                         <>
                           <Upload size={18} />
-                          Choisir une video
+                          Choisir une vidéo
                         </>
                       )}
                     </label>
                     <p className="text-xs text-[#9ca3af] mt-3">
-                      Formats acceptes: MP4, WebM, MOV
+                      Formats acceptés: MP4, WebM, MOV
                     </p>
                   </div>
                 )}

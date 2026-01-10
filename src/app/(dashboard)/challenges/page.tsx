@@ -27,9 +27,9 @@ export default async function ChallengesPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#101828]">Defis disponibles</h1>
+          <h1 className="text-3xl font-bold text-[#101828]">Défis disponibles</h1>
           <p className="text-[#6a7282] mt-1">
-            Choisissez un exercice pour monter en competence sur Bubble.
+            Choisissez un exercice pour monter en compétence sur Bubble.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export default async function ChallengesPage() {
             </svg>
             <input
               type="text"
-              placeholder="Rechercher un defi..."
+              placeholder="Rechercher un défi..."
               className="w-80 pl-11 pr-4 py-3 bg-white border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
             />
           </div>
@@ -97,12 +97,12 @@ export default async function ChallengesPage() {
                   )}
                   {challenge.criteria_functionality && (
                     <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                      Fonctionnalites
+                      Fonctionnalités
                     </span>
                   )}
                   {challenge.criteria_completion && (
                     <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                      Realisation complete
+                      Réalisation complète
                     </span>
                   )}
                 </div>
@@ -129,7 +129,7 @@ export default async function ChallengesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
-            <p className="text-[#6a7282]">Aucun defi disponible pour le moment.</p>
+            <p className="text-[#6a7282]">Aucun défi disponible pour le moment.</p>
           </div>
         )}
       </div>

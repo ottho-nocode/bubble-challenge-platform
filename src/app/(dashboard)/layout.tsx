@@ -16,7 +16,7 @@ import {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: SquaresFour },
-  { href: '/challenges', label: 'Defis', icon: Star },
+  { href: '/challenges', label: 'Défis', icon: Star },
   { href: '/submissions', label: 'Soumissions', icon: Monitor },
   { href: '/review', label: 'Corrections', icon: CheckSquare },
   { href: '/leaderboard', label: 'Classement', icon: ChartBar },
@@ -111,7 +111,7 @@ export default function DashboardLayout({
             className="w-full flex items-center gap-3 px-4 py-3 text-[#ef4444] hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
           >
             <SignOut size={20} />
-            <span>Deconnexion</span>
+            <span>Déconnexion</span>
           </button>
         </div>
       </aside>

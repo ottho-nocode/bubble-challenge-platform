@@ -80,7 +80,7 @@ export default function SubmissionValidator({
   };
 
   const handleCancel = async () => {
-    if (!confirm('Etes-vous sur de vouloir annuler cette soumission ?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette soumission ?')) return;
 
     try {
       const response = await fetch(`/api/submissions/${submissionId}`, {
@@ -138,9 +138,9 @@ export default function SubmissionValidator({
         ) : (
           <div className="bg-gray-100 rounded-xl py-8 px-4 flex flex-col items-center justify-center">
             <CheckCircle size={48} className="text-green-500 mb-3" />
-            <p className="text-gray-700 font-medium">Enregistrement termine</p>
+            <p className="text-gray-700 font-medium">Enregistrement terminé</p>
             <p className="text-gray-500 text-sm mt-1 text-center">
-              Vos actions ont ete capturees. Cliquez sur Valider pour soumettre.
+              Vos actions ont été capturées. Cliquez sur Valider pour soumettre.
             </p>
           </div>
         )}
@@ -149,7 +149,7 @@ export default function SubmissionValidator({
       {/* Duration info */}
       {submission?.duration && (
         <p className="text-sm text-gray-500 mb-4">
-          Duree: {Math.floor(submission.duration / 60000)}:{String(Math.floor((submission.duration % 60000) / 1000)).padStart(2, '0')}
+          Durée: {Math.floor(submission.duration / 60000)}:{String(Math.floor((submission.duration % 60000) / 1000)).padStart(2, '0')}
         </p>
       )}
 

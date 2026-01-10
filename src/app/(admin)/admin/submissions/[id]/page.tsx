@@ -128,7 +128,7 @@ function ActionRow({ action, index }: { action: ActionData; index: number }) {
       case 'navigate':
         return action.url || '';
       case 'drag':
-        return `${action.text || action.element || 'Element'} deplace`;
+        return `${action.text || action.element || 'Element'} déplacé`;
       case 'scroll':
         return `Position Y: ${action.y || 0}`;
       default:
@@ -243,7 +243,7 @@ function ActionsPanel({
           ))
         ) : (
           <div className="p-8 text-center text-gray-400">
-            Aucune action enregistree
+            Aucune action enregistrée
           </div>
         )}
       </div>
@@ -345,7 +345,7 @@ export default function AdminSubmissionDetailPage({
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Detail de la soumission
+              Détail de la soumission
             </h1>
             <p className="text-gray-500 mt-1">
               {submission.challenges?.title} - par {submission.profiles?.username}
@@ -356,7 +356,7 @@ export default function AdminSubmissionDetailPage({
               ? 'bg-green-100 text-green-700'
               : 'bg-yellow-100 text-yellow-700'
           }`}>
-            {submission.status === 'reviewed' ? 'Corrige' : 'En attente'}
+            {submission.status === 'reviewed' ? 'Corrigé' : 'En attente'}
           </span>
         </div>
       </div>
@@ -370,7 +370,7 @@ export default function AdminSubmissionDetailPage({
           </p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-gray-200">
-          <p className="text-xs text-gray-500 mb-1">Duree</p>
+          <p className="text-xs text-gray-500 mb-1">Durée</p>
           <p className="font-medium text-gray-900 flex items-center gap-1">
             <Clock size={16} />
             {submission.duration ? formatTime(submission.duration) : '-'}
@@ -382,12 +382,12 @@ export default function AdminSubmissionDetailPage({
             {submission.challenges?.ai_correction_enabled ? (
               <>
                 <CheckCircle size={16} className="text-green-500" />
-                Activee
+                Activée
               </>
             ) : (
               <>
                 <XCircle size={16} className="text-gray-400" />
-                Desactivee
+                Désactivée
               </>
             )}
           </p>
@@ -423,11 +423,11 @@ export default function AdminSubmissionDetailPage({
               <p className="text-2xl font-bold text-gray-900">{review.score_design}/5</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-1">Fonctionnalites</p>
+              <p className="text-xs text-gray-500 mb-1">Fonctionnalités</p>
               <p className="text-2xl font-bold text-gray-900">{review.score_functionality}/5</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-1">Realisation</p>
+              <p className="text-xs text-gray-500 mb-1">Réalisation</p>
               <p className="text-2xl font-bold text-gray-900">{review.score_completion}/5</p>
             </div>
           </div>
@@ -447,17 +447,17 @@ export default function AdminSubmissionDetailPage({
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
             <div className="px-4 py-3 bg-emerald-600 flex items-center gap-2">
               <VideoCamera size={18} className="text-white" />
-              <h3 className="font-semibold text-white">Video de reference</h3>
+              <h3 className="font-semibold text-white">Vidéo de référence</h3>
             </div>
             <div className="p-4">
               {submission.challenges?.reference_video_playback_id ? (
                 <MuxVideoPlayer
                   playbackId={submission.challenges.reference_video_playback_id}
-                  title="Video de reference"
+                  title="Vidéo de référence"
                 />
               ) : (
                 <div className="bg-gray-100 rounded-xl flex items-center justify-center aspect-video">
-                  <p className="text-gray-400">Aucune video de reference</p>
+                  <p className="text-gray-400">Aucune vidéo de référence</p>
                 </div>
               )}
             </div>
@@ -467,17 +467,17 @@ export default function AdminSubmissionDetailPage({
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
             <div className="px-4 py-3 bg-blue-600 flex items-center gap-2">
               <VideoCamera size={18} className="text-white" />
-              <h3 className="font-semibold text-white">Video de l'eleve</h3>
+              <h3 className="font-semibold text-white">Vidéo de l'élève</h3>
             </div>
             <div className="p-4">
               {submission.mux_playback_id ? (
                 <MuxVideoPlayer
                   playbackId={submission.mux_playback_id}
-                  title="Video de l'eleve"
+                  title="Vidéo de l'élève"
                 />
               ) : (
                 <div className="bg-gray-100 rounded-xl flex items-center justify-center aspect-video">
-                  <p className="text-gray-400">Aucune video disponible</p>
+                  <p className="text-gray-400">Aucune vidéo disponible</p>
                 </div>
               )}
             </div>
@@ -488,14 +488,14 @@ export default function AdminSubmissionDetailPage({
       {/* Actions comparison */}
       <div className="grid grid-cols-2 gap-6">
         <ActionsPanel
-          title="Actions de reference"
+          title="Actions de référence"
           actions={referenceActions}
           screenshots={referenceScreenshots}
           icon={<CheckCircle size={18} className="text-white" />}
           color="bg-emerald-600"
         />
         <ActionsPanel
-          title="Actions de l'eleve"
+          title="Actions de l'élève"
           actions={studentActions}
           screenshots={studentScreenshots}
           icon={<User size={18} className="text-white" />}
@@ -506,7 +506,7 @@ export default function AdminSubmissionDetailPage({
       {/* Raw JSON debug */}
       <details className="mt-6">
         <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-          Afficher les donnees brutes (debug)
+          Afficher les données brutes (debug)
         </summary>
         <div className="mt-2 bg-gray-900 rounded-xl p-4 overflow-x-auto">
           <pre className="text-xs text-gray-300">

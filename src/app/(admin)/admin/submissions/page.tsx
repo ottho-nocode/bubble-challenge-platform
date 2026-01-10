@@ -84,19 +84,19 @@ export default function AdminSubmissionsPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#101828]">Soumissions</h1>
-        <p className="text-[#6a7282] mt-1">Consultez toutes les soumissions des eleves</p>
+        <p className="text-[#6a7282] mt-1">Consultez toutes les soumissions des élèves</p>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-2xl p-4 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] mb-6">
         <div className="flex gap-4">
           <select className="px-4 py-2 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none">
-            <option value="">Tous les defis</option>
+            <option value="">Tous les défis</option>
           </select>
           <select className="px-4 py-2 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none">
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
-            <option value="reviewed">Corrige</option>
+            <option value="reviewed">Corrigé</option>
           </select>
         </div>
       </div>
@@ -107,8 +107,8 @@ export default function AdminSubmissionsPage() {
           <thead className="bg-[#f9fafb] border-b border-[#e5e7eb]">
             <tr>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">ID</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Eleve</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Defi</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Élève</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Défi</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Date</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Statut</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Correcteur</th>
@@ -155,7 +155,7 @@ export default function AdminSubmissionsPage() {
                         ? 'bg-yellow-100 text-yellow-700'
                         : 'bg-green-100 text-green-700'
                     }`}>
-                      {submission.status === 'pending' ? 'En attente' : 'Corrige'}
+                      {submission.status === 'pending' ? 'En attente' : 'Corrigé'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
@@ -182,7 +182,7 @@ export default function AdminSubmissionsPage() {
                       href={`/admin/submissions/${submission.id}`}
                       className="text-[#4a90d9] hover:underline text-sm font-medium"
                     >
-                      Voir details
+                      Voir détails
                     </a>
                   </td>
                 </tr>

@@ -13,7 +13,7 @@ export default async function AdminUsersPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#101828]">Utilisateurs</h1>
-        <p className="text-[#6a7282] mt-1">Gerez les utilisateurs de la plateforme</p>
+        <p className="text-[#6a7282] mt-1">Gérez les utilisateurs de la plateforme</p>
       </div>
 
       {/* Stats */}
@@ -35,7 +35,7 @@ export default async function AdminUsersPage() {
           </p>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
-          <p className="text-sm text-[#6a7282] mb-1">Ont corrige</p>
+          <p className="text-sm text-[#6a7282] mb-1">Ont corrigé</p>
           <p className="text-3xl font-bold text-[#101828]">
             {users?.filter(u => u.reviews_count > 0).length || 0}
           </p>
@@ -52,7 +52,7 @@ export default async function AdminUsersPage() {
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Soumissions</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Corrections</th>
               <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Inscription</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Role</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-[#6a7282]">Rôle</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e5e7eb]">
@@ -76,7 +76,7 @@ export default async function AdminUsersPage() {
                       ? 'bg-purple-100 text-purple-700'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
-                    {user.is_admin ? 'Admin' : 'Eleve'}
+                    {user.is_admin ? 'Admin' : 'Élève'}
                   </span>
                 </td>
               </tr>

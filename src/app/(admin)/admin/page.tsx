@@ -47,13 +47,13 @@ export default async function AdminDashboardPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#101828]">Administration</h1>
-        <p className="text-[#6a7282] mt-1">Gerez les defis et suivez les soumissions</p>
+        <p className="text-[#6a7282] mt-1">Gérez les défis et suivez les soumissions</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
-          <p className="text-sm text-[#6a7282] mb-1">Defis totaux</p>
+          <p className="text-sm text-[#6a7282] mb-1">Défis totaux</p>
           <p className="text-3xl font-bold text-[#101828]">{challengesCount || 0}</p>
           <p className="text-xs text-[#6a7282] mt-2">{activeCount || 0} actifs</p>
         </div>
@@ -81,8 +81,8 @@ export default async function AdminDashboardPage() {
           href="/admin/challenges/new"
           className="bg-[#001354] text-white rounded-2xl p-6 hover:bg-[#001354]/90 transition-colors"
         >
-          <h3 className="text-lg font-semibold mb-2">Creer un nouveau defi</h3>
-          <p className="text-white/70 text-sm">Ajoutez un nouveau defi pour les eleves</p>
+          <h3 className="text-lg font-semibold mb-2">Créer un nouveau défi</h3>
+          <p className="text-white/70 text-sm">Ajoutez un nouveau défi pour les élèves</p>
         </Link>
 
         <Link
@@ -90,14 +90,14 @@ export default async function AdminDashboardPage() {
           className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] hover:shadow-lg transition-shadow"
         >
           <h3 className="text-lg font-semibold text-[#101828] mb-2">Voir les soumissions</h3>
-          <p className="text-[#6a7282] text-sm">Consultez les soumissions des eleves</p>
+          <p className="text-[#6a7282] text-sm">Consultez les soumissions des élèves</p>
         </Link>
       </div>
 
       {/* Recent Submissions */}
       <div className="bg-white rounded-2xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
         <div className="p-6 border-b border-[#e5e7eb] flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-[#101828]">Soumissions recentes</h2>
+          <h2 className="text-lg font-semibold text-[#101828]">Soumissions récentes</h2>
           <Link href="/admin/submissions" className="text-sm text-[#4a90d9] hover:underline">
             Voir tout
           </Link>
@@ -116,7 +116,7 @@ export default async function AdminDashboardPage() {
                   ? 'bg-yellow-100 text-yellow-700'
                   : 'bg-green-100 text-green-700'
               }`}>
-                {submission.status === 'pending' ? 'En attente' : 'Corrige'}
+                {submission.status === 'pending' ? 'En attente' : 'Corrigé'}
               </span>
             </div>
           ))}

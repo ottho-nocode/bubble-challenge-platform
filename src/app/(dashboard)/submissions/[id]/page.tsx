@@ -178,7 +178,7 @@ export default function SubmissionDetailPage({
         className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6 text-sm"
       >
         <ArrowLeft size={16} />
-        Retour a mes soumissions
+        Retour à mes soumissions
       </Link>
 
       {/* Header */}
@@ -269,7 +269,7 @@ export default function SubmissionDetailPage({
                 ? 'bg-green-100 text-green-700'
                 : 'bg-yellow-100 text-yellow-700'
             }`}>
-              {submission.status === 'reviewed' ? 'Corrige' : 'En attente'}
+              {submission.status === 'reviewed' ? 'Corrigé' : 'En attente'}
             </span>
           </div>
         </div>
@@ -296,11 +296,11 @@ export default function SubmissionDetailPage({
               <p className="text-2xl font-bold text-gray-900">{review.score_design}/5</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-sm text-gray-500 mb-1">Fonctionnalites</p>
+              <p className="text-sm text-gray-500 mb-1">Fonctionnalités</p>
               <p className="text-2xl font-bold text-gray-900">{review.score_functionality}/5</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-sm text-gray-500 mb-1">Realisation</p>
+              <p className="text-sm text-gray-500 mb-1">Réalisation</p>
               <p className="text-2xl font-bold text-gray-900">{review.score_completion}/5</p>
             </div>
           </div>
@@ -327,7 +327,7 @@ export default function SubmissionDetailPage({
       {submission.actions_json?.actions && submission.actions_json.actions.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Actions enregistrees ({submission.actions_json.actions.length})
+            Actions enregistrées ({submission.actions_json.actions.length})
           </h2>
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {submission.actions_json.actions.map((action, index) => {
@@ -371,9 +371,9 @@ export default function SubmissionDetailPage({
                     const keyCombo = mods.length > 0 ? `${mods.join('+')}+${action.key}` : action.key;
                     return `Touche: ${keyCombo}`;
                   case 'drag':
-                    return `Glisser-deposer ${action.text ? `"${action.text.substring(0, 30)}"` : 'element'}`;
+                    return `Glisser-déposer ${action.text ? `"${action.text.substring(0, 30)}"` : 'élément'}`;
                   case 'scroll':
-                    return 'Defilement';
+                    return 'Défilement';
                   case 'navigate':
                     return 'Navigation';
                   default:
@@ -411,7 +411,7 @@ export default function SubmissionDetailPage({
       {submission.challenges && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Criteres du defi
+            Critères du défi
           </h2>
           <div className="space-y-3">
             <div className="bg-gray-50 rounded-xl p-3">
@@ -419,11 +419,11 @@ export default function SubmissionDetailPage({
               <p className="text-sm text-gray-600">{submission.challenges.criteria_design}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-sm font-medium text-gray-700 mb-1">Fonctionnalites (0-5)</p>
+              <p className="text-sm font-medium text-gray-700 mb-1">Fonctionnalités (0-5)</p>
               <p className="text-sm text-gray-600">{submission.challenges.criteria_functionality}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-sm font-medium text-gray-700 mb-1">Realisation (0-5)</p>
+              <p className="text-sm font-medium text-gray-700 mb-1">Réalisation (0-5)</p>
               <p className="text-sm text-gray-600">{submission.challenges.criteria_completion}</p>
             </div>
           </div>

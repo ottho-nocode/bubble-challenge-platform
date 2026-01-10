@@ -35,11 +35,11 @@ export default async function DashboardPage() {
             Bonjour, {profile?.username || 'Alex'}
           </h1>
           <p className="text-[#6a7282] mt-1">
-            Voici un apercu de votre progression sur Bubble.
+            Voici un aperçu de votre progression sur Bubble.
           </p>
         </div>
         <div className="text-sm text-[#6a7282]">
-          Derniere connexion: Aujourd&apos;hui, {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+          Dernière connexion: Aujourd&apos;hui, {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm text-[#6a7282]">Serie en cours</p>
+            <p className="text-sm text-[#6a7282]">Série en cours</p>
             <p className="text-2xl font-bold text-[#101828]">3 jours</p>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
           {recommendedChallenge && (
             <div className="bg-gradient-to-br from-[#001354] to-[#4a90d9] rounded-2xl p-8 text-white">
               <span className="inline-flex items-center gap-2 bg-[#f0b100] text-[#101828] text-xs font-medium px-3 py-1 rounded-full mb-4">
-                Defi recommande
+                Défi recommandé
               </span>
               <h2 className="text-2xl font-bold mb-3">{recommendedChallenge.title}</h2>
               <p className="text-white/80 mb-6 max-w-lg">
@@ -119,13 +119,13 @@ export default async function DashboardPage() {
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Commencer le defi
+                  Commencer le défi
                 </Link>
                 <Link
                   href="/challenges"
                   className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-3 rounded-lg font-medium hover:bg-white/20 transition-colors border border-white/20"
                 >
-                  Voir tous les defis
+                  Voir tous les défis
                 </Link>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-[#101828] mb-1">Corriger des pairs</h3>
-                <p className="text-sm text-[#6a7282]">Gagnez des points en aidant la communaute.</p>
+                <p className="text-sm text-[#6a7282]">Gagnez des points en aidant la communauté.</p>
               </Link>
 
               <Link href="/leaderboard" className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] hover:shadow-[0px_4px_8px_0px_rgba(16,24,40,0.1)] transition-shadow group">
@@ -173,14 +173,14 @@ export default async function DashboardPage() {
           {/* Activity Feed */}
           <div className="bg-white rounded-2xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
             <div className="p-6 border-b border-[#e5e7eb]">
-              <h3 className="text-lg font-semibold text-[#101828]">Activite recente</h3>
+              <h3 className="text-lg font-semibold text-[#101828]">Activité récente</h3>
             </div>
             <div className="p-6 space-y-6">
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-[#f0b100] rounded-full mt-2"></div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#101828]">Defi complete</p>
+                    <p className="text-sm font-medium text-[#101828]">Défi complété</p>
                     <span className="text-xs text-[#6a7282]">2h</span>
                   </div>
                   <p className="text-sm text-[#6a7282]">Marketplace MVP</p>
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
                 <div className="w-2 h-2 bg-[#ec4899] rounded-full mt-2"></div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#101828]">Correction recue</p>
+                    <p className="text-sm font-medium text-[#101828]">Correction reçue</p>
                     <span className="text-xs text-[#6a7282]">2j</span>
                   </div>
                   <p className="text-sm text-[#6a7282]">SaaS Dashboard</p>
@@ -228,13 +228,13 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="text-white/80">Progression</span>
-              <span className="font-medium">3/5 defis</span>
+              <span className="font-medium">3/5 défis</span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2 mb-4">
               <div className="bg-white rounded-full h-2 w-3/5"></div>
             </div>
             <p className="text-sm text-white/80">
-              Completez encore 2 defis pour gagner le badge &quot;Regularite&quot;.
+              Complétez encore 2 défis pour gagner le badge &quot;Régularité&quot;.
             </p>
           </div>
         </div>

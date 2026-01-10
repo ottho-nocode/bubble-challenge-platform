@@ -54,12 +54,12 @@ export default function NewChallengePage() {
         className="inline-flex items-center gap-2 text-[#6a7282] hover:text-[#101828] mb-6"
       >
         <ArrowLeft size={20} />
-        Retour aux defis
+        Retour aux défis
       </Link>
 
       <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold text-[#101828] mb-2">Nouveau defi</h1>
-        <p className="text-[#6a7282] mb-8">Creez un nouveau defi pour les eleves</p>
+        <h1 className="text-3xl font-bold text-[#101828] mb-2">Nouveau défi</h1>
+        <p className="text-[#6a7282] mb-8">Créez un nouveau défi pour les élèves</p>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl">
@@ -71,7 +71,7 @@ export default function NewChallengePage() {
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Titre du defi
+                Titre du défi
               </label>
               <input
                 type="text"
@@ -79,7 +79,7 @@ export default function NewChallengePage() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
-                placeholder="Ex: Creer un formulaire de contact"
+                placeholder="Ex: Créer un formulaire de contact"
               />
             </div>
 
@@ -93,14 +93,14 @@ export default function NewChallengePage() {
                 required
                 rows={3}
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none resize-none"
-                placeholder="Decrivez le defi en detail..."
+                placeholder="Décrivez le défi en détail..."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Difficulte
+                  Difficulté
                 </label>
                 <select
                   value={formData.difficulty}
@@ -115,7 +115,7 @@ export default function NewChallengePage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#101828] mb-2">
-                  Categorie
+                  Catégorie
                 </label>
                 <select
                   value={formData.category}
@@ -142,17 +142,17 @@ export default function NewChallengePage() {
                 required
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
               />
-              <p className="text-xs text-[#6a7282] mt-1">Score max: 15 points (5 par critere)</p>
+              <p className="text-xs text-[#6a7282] mt-1">Score max: 15 points (5 par critère)</p>
             </div>
           </div>
 
           {/* Result Image & Resources */}
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
-            <h2 className="text-lg font-semibold text-[#101828]">Medias et ressources</h2>
+            <h2 className="text-lg font-semibold text-[#101828]">Médias et ressources</h2>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Image du resultat attendu (URL)
+                Image du résultat attendu (URL)
               </label>
               <input
                 type="url"
@@ -161,7 +161,7 @@ export default function NewChallengePage() {
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
                 placeholder="https://example.com/image.png (optionnel)"
               />
-              <p className="text-xs text-[#6a7282] mt-1">Laissez vide si pas d&apos;image de reference</p>
+              <p className="text-xs text-[#6a7282] mt-1">Laissez vide si pas d&apos;image de référence</p>
             </div>
 
             <div>
@@ -176,7 +176,7 @@ export default function NewChallengePage() {
                 placeholder='<p>Voici quelques ressources utiles :</p>
 <ul>
   <li><a href="https://...">Documentation Bubble</a></li>
-  <li><a href="https://...">Tutoriel video</a></li>
+  <li><a href="https://...">Tutoriel vidéo</a></li>
 </ul>'
               />
               <p className="text-xs text-[#6a7282] mt-1">Vous pouvez utiliser du HTML pour formater le texte et ajouter des liens</p>
@@ -185,11 +185,11 @@ export default function NewChallengePage() {
 
           {/* Criteria */}
           <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] space-y-6">
-            <h2 className="text-lg font-semibold text-[#101828]">Criteres d&apos;evaluation</h2>
+            <h2 className="text-lg font-semibold text-[#101828]">Critères d&apos;évaluation</h2>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Design
+                Critère Design
               </label>
               <textarea
                 value={formData.criteria_design}
@@ -197,13 +197,13 @@ export default function NewChallengePage() {
                 required
                 rows={2}
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none resize-none"
-                placeholder="Ex: L'interface est esthetique et les couleurs sont harmonieuses"
+                placeholder="Ex: L'interface est esthétique et les couleurs sont harmonieuses"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Fonctionnalites
+                Critère Fonctionnalités
               </label>
               <textarea
                 value={formData.criteria_functionality}
@@ -211,13 +211,13 @@ export default function NewChallengePage() {
                 required
                 rows={2}
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none resize-none"
-                placeholder="Ex: Toutes les fonctionnalites demandees fonctionnent correctement"
+                placeholder="Ex: Toutes les fonctionnalités demandées fonctionnent correctement"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-[#101828] mb-2">
-                Critere Realisation
+                Critère Réalisation
               </label>
               <textarea
                 value={formData.criteria_completion}
@@ -225,7 +225,7 @@ export default function NewChallengePage() {
                 required
                 rows={2}
                 className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none resize-none"
-                placeholder="Ex: Le defi est complete dans son integralite"
+                placeholder="Ex: Le défi est complété dans son intégralité"
               />
             </div>
           </div>
@@ -240,8 +240,8 @@ export default function NewChallengePage() {
                 className="w-5 h-5 rounded border-[#e5e7eb] text-[#001354] focus:ring-[#4a90d9]"
               />
               <div>
-                <p className="font-medium text-[#101828]">Publier immediatement</p>
-                <p className="text-sm text-[#6a7282]">Le defi sera visible par les eleves</p>
+                <p className="font-medium text-[#101828]">Publier immédiatement</p>
+                <p className="text-sm text-[#6a7282]">Le défi sera visible par les élèves</p>
               </div>
             </label>
 
@@ -260,7 +260,7 @@ export default function NewChallengePage() {
                       Beta
                     </span>
                   </div>
-                  <p className="text-sm text-[#6a7282]">Les soumissions seront automatiquement corrigees par l&apos;IA</p>
+                  <p className="text-sm text-[#6a7282]">Les soumissions seront automatiquement corrigées par l&apos;IA</p>
                 </div>
               </label>
             </div>
@@ -273,7 +273,7 @@ export default function NewChallengePage() {
               disabled={loading}
               className="flex-1 bg-[#001354] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#001354]/90 disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Creation...' : 'Creer le defi'}
+              {loading ? 'Création...' : 'Créer le défi'}
             </button>
             <Link
               href="/admin/challenges"

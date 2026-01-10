@@ -30,7 +30,7 @@ export default function ChallengeActions({ challenge }: { challenge: Challenge }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Supprimer le defi "${challenge.title}" ? Cette action est irreversible.`)) {
+    if (!confirm(`Supprimer le défi "${challenge.title}" ? Cette action est irréversible.`)) {
       return;
     }
 
@@ -56,7 +56,7 @@ export default function ChallengeActions({ challenge }: { challenge: Challenge }
             ? 'text-yellow-600 hover:bg-yellow-50'
             : 'text-green-600 hover:bg-green-50'
         }`}
-        title={challenge.is_active ? 'Depublier' : 'Publier'}
+        title={challenge.is_active ? 'Dépublier' : 'Publier'}
       >
         {challenge.is_active ? <EyeSlash size={18} /> : <Eye size={18} />}
       </button>
