@@ -64,25 +64,15 @@ export default function LoginPage() {
               <label htmlFor="email" className="block text-[15px] font-semibold text-[#101828] mb-2">
                 Email
               </label>
-              <div className="relative">
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[15px] text-[#101828] placeholder-[#9ca3af] focus:ring-2 focus:ring-[#001354]/20 focus:border-[#001354] outline-none transition-all"
-                  placeholder="exemple@email.com"
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a9d9a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                  </svg>
-                </div>
-              </div>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[15px] text-[#101828] placeholder-[#9ca3af] focus:ring-2 focus:ring-[#001354]/20 focus:border-[#001354] outline-none transition-all"
+                placeholder="exemple@email.com"
+              />
             </div>
 
             {/* Password */}
@@ -95,25 +85,15 @@ export default function LoginPage() {
                   Oublié ?
                 </Link>
               </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[15px] text-[#101828] placeholder-[#9ca3af] focus:ring-2 focus:ring-[#001354]/20 focus:border-[#001354] outline-none transition-all"
-                  placeholder="••••••••"
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                  </svg>
-                </div>
-              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[15px] text-[#101828] placeholder-[#9ca3af] focus:ring-2 focus:ring-[#001354]/20 focus:border-[#001354] outline-none transition-all"
+                placeholder="••••••••"
+              />
             </div>
 
             {/* Submit Button */}
