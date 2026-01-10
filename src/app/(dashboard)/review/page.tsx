@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { formatDateTime } from '@/lib/utils/date';
 
 const difficultyColors = {
   easy: 'bg-[#dcfce7] text-[#166534]',
@@ -132,11 +133,7 @@ export default async function ReviewPage() {
                 <p className="text-[#6a7282] text-sm mb-4">
                   Soumis par <span className="font-medium text-[#101828]">{submission.profiles?.username}</span>
                   {' le '}
-                  {new Date(submission.created_at).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
+                  {formatDateTime(submission.created_at)}
                 </p>
 
                 {/* Meta info */}

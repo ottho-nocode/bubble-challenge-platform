@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
+import { formatDateTime } from '@/lib/utils/date';
 
 interface Submission {
   id: string;
@@ -146,11 +147,7 @@ export default function AdminSubmissionsPage() {
                     </p>
                   </td>
                   <td className="px-6 py-4 text-sm text-[#6a7282]">
-                    {new Date(submission.created_at).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    {formatDateTime(submission.created_at)}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { formatDateShort } from '@/lib/utils/date';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -107,7 +108,7 @@ export default async function AdminDashboardPage() {
               <div>
                 <p className="font-medium text-[#101828]">{submission.challenges?.title}</p>
                 <p className="text-sm text-[#6a7282]">
-                  Par {submission.profiles?.username} - {new Date(submission.created_at).toLocaleDateString('fr-FR')}
+                  Par {submission.profiles?.username} - {formatDateShort(submission.created_at)}
                 </p>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${

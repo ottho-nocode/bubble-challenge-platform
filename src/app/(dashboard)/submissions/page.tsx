@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import DeleteSubmissionButton from '@/components/DeleteSubmissionButton';
+import { formatDateTime } from '@/lib/utils/date';
 
 const statusLabels = {
   pending: 'En attente',
@@ -107,13 +108,7 @@ export default async function SubmissionsPage({
                   </div>
 
                   <p className="text-sm text-[#6a7282] mb-3">
-                    Soumis le {new Date(submission.created_at).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    Soumis le {formatDateTime(submission.created_at)}
                     {submission.duration && (
                       <span className="ml-2">
                         - Duree: {Math.round(submission.duration / 1000 / 60)} min

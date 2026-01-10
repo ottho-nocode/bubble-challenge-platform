@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Trophy, Robot, User, CaretLeft, CaretRight, Images, Cursor, TextT, Keyboard, ArrowsOutCardinal } from '@phosphor-icons/react';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
+import { formatDateTime } from '@/lib/utils/date';
 
 interface Screenshot {
   t: number;
@@ -186,13 +187,7 @@ export default function SubmissionDetailPage({
           {submission.challenges?.title || 'Soumission'}
         </h1>
         <p className="text-gray-500 mt-1">
-          Soumis le {new Date(submission.created_at).toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+          Soumis le {formatDateTime(submission.created_at)}
         </p>
       </div>
 

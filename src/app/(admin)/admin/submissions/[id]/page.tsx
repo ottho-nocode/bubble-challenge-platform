@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Robot, User, Clock, CheckCircle, XCircle, CaretDown, CaretRight, Image as ImageIcon, VideoCamera } from '@phosphor-icons/react';
 import MuxVideoPlayer from '@/components/MuxVideoPlayer';
+import { formatDateTime, formatDateShort } from '@/lib/utils/date';
 
 interface ActionData {
   t: number;
@@ -365,13 +366,7 @@ export default function AdminSubmissionDetailPage({
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <p className="text-xs text-gray-500 mb-1">Date</p>
           <p className="font-medium text-gray-900">
-            {new Date(submission.created_at).toLocaleDateString('fr-FR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {formatDateTime(submission.created_at)}
           </p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-gray-200">
@@ -418,7 +413,7 @@ export default function AdminSubmissionDetailPage({
               Correction {review.is_ai_review ? 'par IA' : `par ${review.profiles?.username}`}
             </h3>
             <span className="text-xs text-gray-400">
-              {new Date(review.created_at).toLocaleDateString('fr-FR')}
+              {formatDateShort(review.created_at)}
             </span>
           </div>
 

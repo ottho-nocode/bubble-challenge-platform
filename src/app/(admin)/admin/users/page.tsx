@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { formatDateShort } from '@/lib/utils/date';
 
 export default async function AdminUsersPage() {
   const supabase = await createClient();
@@ -67,11 +68,7 @@ export default async function AdminUsersPage() {
                 <td className="px-6 py-4 text-[#101828]">{user.submissions_count}</td>
                 <td className="px-6 py-4 text-[#101828]">{user.reviews_count}</td>
                 <td className="px-6 py-4 text-sm text-[#6a7282]">
-                  {new Date(user.created_at).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
+                  {formatDateShort(user.created_at)}
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
