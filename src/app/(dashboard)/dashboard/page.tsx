@@ -1,30 +1,125 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 
+type ActivityItem = {
+  id: string;
+  type: 'submission' | 'review_given' | 'review_received';
+  title: string;
+  description: string;
+  points: number | null;
+  created_at: string;
+};
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id)
-    .single();
+  // Parallelize all queries
+  const [
+    profileResult,
+    pendingReviewsResult,
+    challengesResult,
+    recentSubmissionsResult,
+    recentReviewsGivenResult,
+    recentReviewsReceivedResult,
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user?.id).single(),
+    supabase.from('submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending').neq('user_id', user?.id),
+    supabase.from('challenges').select('*').eq('is_active', true).limit(1),
+    // Recent submissions
+    supabase
+      .from('submissions')
+      .select('id, created_at, challenges (title)')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false })
+      .limit(3),
+    // Recent reviews given
+    supabase
+      .from('reviews')
+      .select('id, created_at, submissions (challenges (title))')
+      .eq('reviewer_id', user?.id)
+      .order('created_at', { ascending: false })
+      .limit(3),
+    // Recent reviews received
+    supabase
+      .from('reviews')
+      .select('id, created_at, score_design, score_functionality, score_completion, is_ai_review, submissions!inner (user_id, challenges (title))')
+      .eq('submissions.user_id', user?.id)
+      .order('created_at', { ascending: false })
+      .limit(3),
+  ]);
 
-  const { count: pendingReviews } = await supabase
-    .from('submissions')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-    .neq('user_id', user?.id);
+  const profile = profileResult.data;
+  const pendingReviews = pendingReviewsResult.count;
+  const recommendedChallenge = challengesResult.data?.[0];
 
-  // Get a recommended challenge
-  const { data: challenges } = await supabase
-    .from('challenges')
-    .select('*')
-    .limit(1);
+  // Build recent activity
+  const activities: ActivityItem[] = [];
 
-  const recommendedChallenge = challenges?.[0];
+  recentSubmissionsResult.data?.forEach((sub) => {
+    const challenge = Array.isArray(sub.challenges) ? sub.challenges[0] : sub.challenges;
+    activities.push({
+      id: `sub-${sub.id}`,
+      type: 'submission',
+      title: 'Défi soumis',
+      description: challenge?.title || 'Défi',
+      points: null,
+      created_at: sub.created_at,
+    });
+  });
+
+  recentReviewsGivenResult.data?.forEach((review) => {
+    const submission = Array.isArray(review.submissions) ? review.submissions[0] : review.submissions;
+    const challenge = (submission as { challenges?: { title?: string } | { title?: string }[] })?.challenges;
+    const challengeTitle = Array.isArray(challenge) ? challenge[0]?.title : challenge?.title;
+    activities.push({
+      id: `review-given-${review.id}`,
+      type: 'review_given',
+      title: 'Correction effectuée',
+      description: challengeTitle || 'Défi',
+      points: 5,
+      created_at: review.created_at,
+    });
+  });
+
+  recentReviewsReceivedResult.data?.forEach((review) => {
+    const submission = Array.isArray(review.submissions) ? review.submissions[0] : review.submissions;
+    const challenge = (submission as { challenges?: { title?: string } | { title?: string }[] })?.challenges;
+    const challengeTitle = Array.isArray(challenge) ? challenge[0]?.title : challenge?.title;
+    const totalScore = review.score_design + review.score_functionality + review.score_completion;
+    activities.push({
+      id: `review-received-${review.id}`,
+      type: 'review_received',
+      title: review.is_ai_review ? 'Correction IA' : 'Correction reçue',
+      description: challengeTitle || 'Défi',
+      points: totalScore,
+      created_at: review.created_at,
+    });
+  });
+
+  // Sort by date and take top 5
+  activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const recentActivities = activities.slice(0, 5);
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 60) return `${diffMins}min`;
+    if (diffHours < 24) return `${diffHours}h`;
+    return `${diffDays}j`;
+  };
+
+  const activityColors = {
+    submission: 'bg-[#4a90d9]',
+    review_given: 'bg-[#22c55e]',
+    review_received: 'bg-[#f0b100]',
+  };
 
   return (
     <div className="p-8">
@@ -176,45 +271,33 @@ export default async function DashboardPage() {
               <h3 className="text-lg font-semibold text-[#101828]">Activité récente</h3>
             </div>
             <div className="p-6 space-y-6">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-[#f0b100] rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#101828]">Défi complété</p>
-                    <span className="text-xs text-[#6a7282]">2h</span>
+              {recentActivities.length > 0 ? (
+                recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3">
+                    <div className={`w-2 h-2 ${activityColors[activity.type]} rounded-full mt-2`}></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-[#101828] truncate">{activity.title}</p>
+                        <span className="text-xs text-[#6a7282] shrink-0 ml-2">{getTimeAgo(activity.created_at)}</span>
+                      </div>
+                      <p className="text-sm text-[#6a7282] truncate">{activity.description}</p>
+                    </div>
+                    {activity.points !== null && (
+                      <span className="text-sm font-medium text-[#22c55e] shrink-0">+{activity.points}</span>
+                    )}
                   </div>
-                  <p className="text-sm text-[#6a7282]">Marketplace MVP</p>
+                ))
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-[#6a7282]">Aucune activité récente</p>
+                  <p className="text-xs text-[#9ca3af] mt-1">Commencez par soumettre un défi !</p>
                 </div>
-                <span className="text-sm font-medium text-[#22c55e]">+50</span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-[#4a90d9] rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#101828]">Nouveau badge</p>
-                    <span className="text-xs text-[#6a7282]">1j</span>
-                  </div>
-                  <p className="text-sm text-[#6a7282]">Premiers pas</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-[#ec4899] rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#101828]">Correction reçue</p>
-                    <span className="text-xs text-[#6a7282]">2j</span>
-                  </div>
-                  <p className="text-sm text-[#6a7282]">SaaS Dashboard</p>
-                </div>
-                <span className="text-sm font-medium text-[#22c55e]">+10</span>
-              </div>
+              )}
             </div>
             <div className="p-4 border-t border-[#e5e7eb]">
-              <button className="w-full py-2 text-sm text-[#6a7282] hover:text-[#101828] transition-colors">
+              <Link href="/activity" className="block w-full py-2 text-sm text-[#6a7282] hover:text-[#101828] transition-colors text-center">
                 Voir tout l&apos;historique
-              </button>
+              </Link>
             </div>
           </div>
 
