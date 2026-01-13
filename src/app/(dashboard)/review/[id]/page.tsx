@@ -9,6 +9,7 @@ import MuxVideoPlayer from '@/components/MuxVideoPlayer';
 
 interface Submission {
   id: string;
+  user_id: string;
   video_url: string;
   mux_playback_id: string | null;
   duration: number;
@@ -50,6 +51,9 @@ export default function ReviewDetailPage({
       const { id } = await params;
       const supabase = createClient();
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
       const { data, error } = await supabase
         .from('submissions')
         .select(`
@@ -71,6 +75,8 @@ export default function ReviewDetailPage({
 
       if (error || !data) {
         setError('Soumission introuvable');
+      } else if (data.user_id === user?.id) {
+        setError('Vous ne pouvez pas corriger votre propre soumission');
       } else {
         setSubmission(data);
       }
@@ -90,6 +96,13 @@ export default function ReviewDetailPage({
 
     if (!user || !submission) {
       setError('Erreur d\'authentification');
+      setSubmitting(false);
+      return;
+    }
+
+    // Double check: prevent self-review
+    if (submission.user_id === user.id) {
+      setError('Vous ne pouvez pas corriger votre propre soumission');
       setSubmitting(false);
       return;
     }
