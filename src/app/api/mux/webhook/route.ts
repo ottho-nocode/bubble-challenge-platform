@@ -81,19 +81,23 @@ export async function POST(request: NextRequest) {
         });
 
         if (upload_type === 'preview') {
-          // Update challenge with preview video (for students to watch)
+          // Update challenge with preview video (for students AND AI reference)
           const { error } = await supabase
             .from('challenges')
             .update({
               preview_video_asset_id: assetId,
               preview_video_playback_id: playbackId,
+              // Also use as AI reference
+              reference_video_asset_id: assetId,
+              reference_video_playback_id: playbackId,
+              reference_video_duration: Math.round(duration * 1000),
             })
             .eq('id', challenge_id);
 
           if (error) {
             console.error('Error updating challenge with preview video:', error);
           } else {
-            console.log('Preview video saved for challenge:', challenge_id);
+            console.log('Preview video saved for challenge (also as AI reference):', challenge_id);
           }
         } else if (upload_type === 'reference') {
           // Update challenge with reference video (for AI comparison)
