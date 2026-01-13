@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Get challenge info
     const { data: challenge, error: challengeError } = await supabase
       .from('challenges')
-      .select('id, title, ai_correction_enabled, reference_actions_json')
+      .select('id, title, ai_correction_enabled, reference_actions_json, preview_video_playback_id')
       .eq('id', challengeId)
       .single();
 
@@ -60,20 +60,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Determine upload mode
-    // Admins always record in "reference" mode - video serves as both:
-    // 1. Preview video for students to see the expected result
-    // 2. Reference for AI comparison (if AI correction is enabled)
-    const shouldRecordReference = isAdmin;
+    // Check if reference video exists (preview video is used as reference)
+    const hasReference = !!challenge.preview_video_playback_id;
 
     return NextResponse.json({
       challenge_id: challenge.id,
       title: challenge.title,
       ai_correction_enabled: challenge.ai_correction_enabled,
-      has_reference: !!challenge.reference_actions_json,
+      has_reference: hasReference,
       is_admin: isAdmin,
-      upload_mode: shouldRecordReference ? 'reference' : 'submission',
-      upload_endpoint: shouldRecordReference ? '/api/upload-reference' : '/api/upload',
+      // Admin chooses via toggle, default to submission
+      upload_mode: 'submission',
+      upload_endpoint: '/api/upload',
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

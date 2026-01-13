@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft } from '@phosphor-icons/react';
 
 export default function NewChallengePage() {
@@ -32,19 +31,28 @@ export default function NewChallengePage() {
     setLoading(true);
     setError('');
 
-    const supabase = createClient();
+    try {
+      // Use admin API route to create challenge (bypasses RLS)
+      const response = await fetch('/api/admin/challenges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    const { error } = await supabase
-      .from('challenges')
-      .insert([formData]);
+      const result = await response.json();
 
-    if (error) {
-      setError(error.message);
+      if (!response.ok) {
+        setError(result.error || 'Erreur lors de la création');
+        setLoading(false);
+        return;
+      }
+
+      router.push('/admin/challenges');
+    } catch (err) {
+      console.error('Create error:', err);
+      setError('Erreur lors de la création');
       setLoading(false);
-      return;
     }
-
-    router.push('/admin/challenges');
   };
 
   return (
