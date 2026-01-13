@@ -128,40 +128,45 @@ async function compareScreenshots(
     };
   }
 
-  // Select key screenshots to compare:
-  // - First screenshot (starting point)
-  // - Screenshots at key actions (clicks)
-  // - Last screenshot (final result)
-  const keyRefScreenshots: { label: string; screenshot: Screenshot }[] = [];
-  const keyStudentScreenshots: { label: string; screenshot: Screenshot }[] = [];
+  // Get ALL click actions from reference
+  const refClickActions = refActions.filter(a => a.type === 'click');
+  const studentClickActions = studentActions.filter(a => a.type === 'click');
 
-  // Add first screenshot
-  keyRefScreenshots.push({ label: 'Début', screenshot: refScreenshots[0] });
-  keyStudentScreenshots.push({ label: 'Début', screenshot: studentScreenshots[0] });
+  // Build comparison pairs for each click action
+  const comparisonPairs: { label: string; refScreenshot: Screenshot; studentScreenshot: Screenshot }[] = [];
 
-  // Add screenshots for click actions (up to 3 key actions)
-  const refClickActions = refActions.filter(a => a.type === 'click').slice(0, 3);
-  refClickActions.forEach((action, i) => {
-    const screenshot = findScreenshotForAction(refScreenshots, action.t);
-    if (screenshot) {
-      keyRefScreenshots.push({ label: `Action ${i + 1}`, screenshot });
+  // For each reference click action, find matching screenshot in both ref and student
+  refClickActions.forEach((refAction, i) => {
+    const refScreenshot = findScreenshotForAction(refScreenshots, refAction.t);
+
+    // Try to find corresponding student action (by index)
+    const studentAction = studentClickActions[i];
+    const studentScreenshot = studentAction
+      ? findScreenshotForAction(studentScreenshots, studentAction.t)
+      : (studentScreenshots.length > 0 ? studentScreenshots[studentScreenshots.length - 1] : null);
+
+    if (refScreenshot && studentScreenshot) {
+      const actionDesc = refAction.text || refAction.element || `Clic ${i + 1}`;
+      comparisonPairs.push({
+        label: `Clic ${i + 1}: ${actionDesc.substring(0, 30)}`,
+        refScreenshot,
+        studentScreenshot,
+      });
     }
   });
 
-  const studentClickActions = studentActions.filter(a => a.type === 'click').slice(0, 3);
-  studentClickActions.forEach((action, i) => {
-    const screenshot = findScreenshotForAction(studentScreenshots, action.t);
-    if (screenshot) {
-      keyStudentScreenshots.push({ label: `Action ${i + 1}`, screenshot });
-    }
-  });
+  // Add final result comparison if we have screenshots
+  if (refScreenshots.length > 0 && studentScreenshots.length > 0) {
+    comparisonPairs.push({
+      label: 'Résultat final',
+      refScreenshot: refScreenshots[refScreenshots.length - 1],
+      studentScreenshot: studentScreenshots[studentScreenshots.length - 1],
+    });
+  }
 
-  // Add last screenshot (final result)
-  keyRefScreenshots.push({ label: 'Résultat final', screenshot: refScreenshots[refScreenshots.length - 1] });
-  keyStudentScreenshots.push({ label: 'Résultat final', screenshot: studentScreenshots[studentScreenshots.length - 1] });
-
-  // Build comparison pairs (match by index/label)
-  const comparisonCount = Math.min(keyRefScreenshots.length, keyStudentScreenshots.length, 4);
+  // Limit to 10 pairs max (Gemini has limits on content size)
+  const limitedPairs = comparisonPairs.slice(0, 10);
+  const comparisonCount = limitedPairs.length;
 
   console.log('AI Review - Comparing', comparisonCount, 'screenshot pairs');
 
@@ -204,15 +209,12 @@ Réponds UNIQUEMENT avec un JSON valide (sans markdown):
     // Build content array with all comparison pairs
     const content: (string | { text: string } | { inlineData: { mimeType: string; data: string } })[] = [prompt];
 
-    for (let i = 0; i < comparisonCount; i++) {
-      const refItem = keyRefScreenshots[i];
-      const studentItem = keyStudentScreenshots[i];
-
-      content.push({ text: `\n\n=== ÉTAPE: ${refItem.label} ===` });
-      content.push({ text: `\n--- RÉFÉRENCE (${refItem.label}) ---` });
-      content.push(getImageData(refItem.screenshot.data));
-      content.push({ text: `\n--- ÉLÈVE (${studentItem.label}) ---` });
-      content.push(getImageData(studentItem.screenshot.data));
+    for (const pair of limitedPairs) {
+      content.push({ text: `\n\n=== ${pair.label} ===` });
+      content.push({ text: `\n--- RÉFÉRENCE ---` });
+      content.push(getImageData(pair.refScreenshot.data));
+      content.push({ text: `\n--- ÉLÈVE ---` });
+      content.push(getImageData(pair.studentScreenshot.data));
     }
 
     console.log('Sending vision prompt to Gemini with', comparisonCount * 2, 'images');
