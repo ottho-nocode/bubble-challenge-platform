@@ -37,6 +37,13 @@ export async function POST(
       return NextResponse.json({ error: 'Vous n\'etes pas le proprietaire de cette soumission' }, { status: 403 });
     }
 
+    // If already reviewed by AI, consider it a success (no action needed)
+    if (submission.status === 'reviewed') {
+      console.log('Submission already reviewed by AI, returning success');
+      return NextResponse.json({ success: true, already_reviewed: true });
+    }
+
+    // For other non-pending statuses, still return error
     if (submission.status !== 'pending') {
       return NextResponse.json({ error: `Cette soumission a deja ete validee (status: ${submission.status})` }, { status: 400 });
     }

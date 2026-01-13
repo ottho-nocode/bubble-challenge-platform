@@ -108,6 +108,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Fallback: search by user_id + challenge_id where actions not yet set
+    if (!existingSubmission) {
+      const { data: matchedSubmission } = await supabase
+        .from('submissions')
+        .select('id, mux_asset_id, mux_playback_id')
+        .eq('user_id', user.id)
+        .eq('challenge_id', challengeId)
+        .is('actions_json', null) // Only match if actions not yet set
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (matchedSubmission) {
+        console.log('Found submission by user_id+challenge_id fallback:', matchedSubmission.id);
+        existingSubmission = matchedSubmission;
+      }
+    }
+
     let submission;
     let insertError;
 
@@ -120,6 +138,8 @@ export async function POST(request: NextRequest) {
           actions_json: submissionData,
           duration: typeof duration === 'number' ? duration : (duration ? parseInt(duration) : null),
           bubble_url: bubbleUrl || null,
+          // Also set mux_upload_id if not already set (links webhook submission with this upload)
+          ...(muxUploadId ? { mux_upload_id: muxUploadId } : {}),
         })
         .eq('id', existingSubmission.id)
         .select()

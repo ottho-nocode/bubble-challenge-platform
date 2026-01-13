@@ -124,25 +124,25 @@ export async function POST(request: NextRequest) {
           let searchError = null;
 
           if (sourceUploadId) {
+            // Search by mux_upload_id WITHOUT status filter (AI review may have already changed it)
             const result = await supabase
               .from('submissions')
               .select('id, mux_asset_id')
               .eq('mux_upload_id', sourceUploadId)
-              .eq('status', 'pending')
               .single();
             existingSubmission = result.data;
             searchError = result.error;
             console.log('Search by mux_upload_id result:', { existingSubmission, searchError });
           }
 
-          // Fallback: search by user_id + challenge_id
+          // Fallback: search by user_id + challenge_id (without status filter)
           if (!existingSubmission) {
             const result = await supabase
               .from('submissions')
               .select('id, mux_asset_id')
               .eq('user_id', user_id)
               .eq('challenge_id', challenge_id)
-              .eq('status', 'pending')
+              .is('mux_playback_id', null) // Only match if video not yet linked
               .order('created_at', { ascending: false })
               .limit(1)
               .single();
