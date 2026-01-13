@@ -15,8 +15,8 @@ declare global {
   }
 }
 
-// Extension ID
-const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || 'abbhlbldflfpeolmjihamfngefcpbiig';
+// Extension ID - Chrome Web Store
+const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || 'nmdinpmnihdblkfjdoojllfliacoljgk';
 
 interface ExtensionLauncherProps {
   challengeId: string;
@@ -144,7 +144,7 @@ export default function ExtensionLauncher({
 
         {/* Install button */}
         <a
-          href="https://github.com/ottho-nocode/bubble-recorder-plugin"
+          href="https://chromewebstore.google.com/detail/bubble-challenge-recorder/nmdinpmnihdblkfjdoojllfliacoljgk"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full bg-[#d97706] text-white py-3 px-4 rounded-[9px] font-medium hover:bg-[#b45309] transition-colors"
