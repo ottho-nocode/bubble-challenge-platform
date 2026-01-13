@@ -110,6 +110,192 @@ function getImageData(screenshot: string) {
   };
 }
 
+// STEP 1: Analyze reference to identify checkpoints
+async function analyzeReference(
+  refScreenshots: Screenshot[],
+  refActions: Action[],
+  challengeTitle: string,
+  challengeDescription: string
+): Promise<string[]> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  // Select key screenshots (first, middle clicks, and last)
+  const keyScreenshots: Screenshot[] = [];
+  const refClickActions = refActions.filter(a => a.type === 'click');
+
+  // Add screenshots for each click action
+  for (const action of refClickActions.slice(0, 5)) {
+    const screenshot = findScreenshotForAction(refScreenshots, action.t);
+    if (screenshot && !keyScreenshots.includes(screenshot)) {
+      keyScreenshots.push(screenshot);
+    }
+  }
+
+  // Always include final screenshot
+  if (refScreenshots.length > 0) {
+    const lastScreenshot = refScreenshots[refScreenshots.length - 1];
+    if (!keyScreenshots.includes(lastScreenshot)) {
+      keyScreenshots.push(lastScreenshot);
+    }
+  }
+
+  const prompt = `Tu es un expert Bubble.io. Analyse ces captures d'écran d'une solution de référence pour identifier les CHECKPOINTS (points de contrôle) que l'élève devra atteindre.
+
+## DÉFI
+**Titre:** ${challengeTitle}
+**Description:** ${challengeDescription}
+
+## INSTRUCTIONS
+Examine les ${keyScreenshots.length} captures d'écran de la solution de référence et identifie:
+1. Les éléments UI clés qui doivent être présents (boutons, textes, formulaires, etc.)
+2. Les actions importantes effectuées (clics, ouvertures de popups/sheets, etc.)
+3. Le résultat final attendu
+
+## RÉPONSE ATTENDUE
+Réponds UNIQUEMENT avec un JSON valide contenant un tableau de checkpoints:
+["Checkpoint 1: description précise", "Checkpoint 2: description précise", ...]
+
+Limite-toi à 5-7 checkpoints maximum, les plus importants.`;
+
+  const content: (string | { text: string } | { inlineData: { mimeType: string; data: string } })[] = [prompt];
+
+  for (let i = 0; i < keyScreenshots.length; i++) {
+    content.push({ text: `\n\n=== Étape ${i + 1}/${keyScreenshots.length} ===` });
+    content.push(getImageData(keyScreenshots[i].data));
+  }
+
+  console.log('Step 1: Analyzing reference with', keyScreenshots.length, 'screenshots');
+
+  try {
+    const result = await model.generateContent(content);
+    const text = result.response.text();
+
+    console.log('Reference analysis raw:', text.substring(0, 300));
+
+    // Extract JSON array
+    let jsonStr = text;
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[0];
+    }
+
+    const checkpoints = JSON.parse(jsonStr) as string[];
+    console.log('Identified checkpoints:', checkpoints);
+    return checkpoints;
+  } catch (error) {
+    console.error('Reference analysis error:', error);
+    return ['Vérifier que le résultat final correspond à la référence'];
+  }
+}
+
+// STEP 2: Evaluate student work against checkpoints
+async function evaluateStudent(
+  studentScreenshots: Screenshot[],
+  studentActions: Action[],
+  checkpoints: string[],
+  challengeTitle: string,
+  criteriaDesign: string,
+  criteriaFunctionality: string,
+  criteriaCompletion: string
+): Promise<ReviewResult> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  // Select key student screenshots
+  const keyScreenshots: Screenshot[] = [];
+  const studentClickActions = studentActions.filter(a => a.type === 'click');
+
+  for (const action of studentClickActions.slice(0, 8)) {
+    const screenshot = findScreenshotForAction(studentScreenshots, action.t);
+    if (screenshot && !keyScreenshots.includes(screenshot)) {
+      keyScreenshots.push(screenshot);
+    }
+  }
+
+  // Always include final screenshot
+  if (studentScreenshots.length > 0) {
+    const lastScreenshot = studentScreenshots[studentScreenshots.length - 1];
+    if (!keyScreenshots.includes(lastScreenshot)) {
+      keyScreenshots.push(lastScreenshot);
+    }
+  }
+
+  const checkpointsList = checkpoints.map((c, i) => `${i + 1}. ${c}`).join('\n');
+
+  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io.
+
+## DÉFI: ${challengeTitle}
+
+## CHECKPOINTS À VÉRIFIER
+Voici les points de contrôle identifiés dans la solution de référence:
+${checkpointsList}
+
+## CRITÈRES D'ÉVALUATION
+- **Design (0-5):** ${criteriaDesign || 'Respect du design attendu'}
+- **Fonctionnalités (0-5):** ${criteriaFunctionality || 'Présence des éléments interactifs'}
+- **Réalisation (0-5):** ${criteriaCompletion || 'Complétude du résultat'}
+
+## TRAVAIL DE L'ÉLÈVE
+Tu vas recevoir ${keyScreenshots.length} captures d'écran du travail de l'élève.
+Pour chaque checkpoint, vérifie s'il est atteint ou non.
+
+## BARÈME
+- 5/5: Tous les checkpoints atteints parfaitement
+- 4/5: Presque tous les checkpoints atteints, différences mineures
+- 3/5: La majorité des checkpoints atteints
+- 2/5: Seulement quelques checkpoints atteints
+- 1/5: Très peu de checkpoints atteints
+- 0/5: Aucun checkpoint atteint
+
+## RÉPONSE ATTENDUE
+Réponds UNIQUEMENT avec un JSON valide (sans markdown):
+{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif en français (3-4 phrases). Liste les checkpoints atteints ✓ et ceux manqués ✗."}`;
+
+  const content: (string | { text: string } | { inlineData: { mimeType: string; data: string } })[] = [prompt];
+
+  for (let i = 0; i < keyScreenshots.length; i++) {
+    content.push({ text: `\n\n=== Capture ${i + 1}/${keyScreenshots.length} ===` });
+    content.push(getImageData(keyScreenshots[i].data));
+  }
+
+  console.log('Step 2: Evaluating student with', keyScreenshots.length, 'screenshots against', checkpoints.length, 'checkpoints');
+
+  try {
+    const result = await model.generateContent(content);
+    const text = result.response.text();
+
+    console.log('Student evaluation raw:', text.substring(0, 500));
+
+    // Extract JSON
+    let jsonStr = text;
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    } else {
+      const objectMatch = text.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        jsonStr = objectMatch[0];
+      }
+    }
+
+    const reviewResult = JSON.parse(jsonStr) as ReviewResult;
+
+    return {
+      score_design: Math.max(0, Math.min(5, Math.round(reviewResult.score_design))),
+      score_functionality: Math.max(0, Math.min(5, Math.round(reviewResult.score_functionality))),
+      score_completion: Math.max(0, Math.min(5, Math.round(reviewResult.score_completion))),
+      comment: reviewResult.comment || 'Évaluation automatique par IA.',
+    };
+  } catch (error) {
+    console.error('Student evaluation error:', error);
+    return {
+      score_design: 3,
+      score_functionality: 3,
+      score_completion: 3,
+      comment: 'Évaluation automatique - l\'IA n\'a pas pu analyser complètement cette soumission.',
+    };
+  }
+}
+
 async function compareScreenshots(
   referenceData: unknown,
   studentData: unknown,
@@ -145,132 +331,26 @@ async function compareScreenshots(
     };
   }
 
-  // Get ALL click actions from reference
-  const refClickActions = refActions.filter(a => a.type === 'click');
-  const studentClickActions = studentActions.filter(a => a.type === 'click');
+  // STEP 1: Analyze reference to identify checkpoints
+  const checkpoints = await analyzeReference(
+    refScreenshots,
+    refActions,
+    challengeTitle,
+    challengeDescription
+  );
 
-  // Build comparison pairs for each click action
-  const comparisonPairs: { label: string; refScreenshot: Screenshot; studentScreenshot: Screenshot }[] = [];
+  // STEP 2: Evaluate student against checkpoints
+  const reviewResult = await evaluateStudent(
+    studentScreenshots,
+    studentActions,
+    checkpoints,
+    challengeTitle,
+    criteriaDesign,
+    criteriaFunctionality,
+    criteriaCompletion
+  );
 
-  // For each reference click action, find matching screenshot in both ref and student
-  refClickActions.forEach((refAction, i) => {
-    const refScreenshot = findScreenshotForAction(refScreenshots, refAction.t);
-
-    // Try to find corresponding student action (by index)
-    const studentAction = studentClickActions[i];
-    const studentScreenshot = studentAction
-      ? findScreenshotForAction(studentScreenshots, studentAction.t)
-      : (studentScreenshots.length > 0 ? studentScreenshots[studentScreenshots.length - 1] : null);
-
-    if (refScreenshot && studentScreenshot) {
-      const actionDesc = refAction.text || refAction.element || `Clic ${i + 1}`;
-      comparisonPairs.push({
-        label: `Clic ${i + 1}: ${actionDesc.substring(0, 30)}`,
-        refScreenshot,
-        studentScreenshot,
-      });
-    }
-  });
-
-  // Add final result comparison if we have screenshots
-  if (refScreenshots.length > 0 && studentScreenshots.length > 0) {
-    comparisonPairs.push({
-      label: 'Résultat final',
-      refScreenshot: refScreenshots[refScreenshots.length - 1],
-      studentScreenshot: studentScreenshots[studentScreenshots.length - 1],
-    });
-  }
-
-  // Limit to 10 pairs max (Gemini has limits on content size)
-  const limitedPairs = comparisonPairs.slice(0, 10);
-  const comparisonCount = limitedPairs.length;
-
-  console.log('AI Review - Comparing', comparisonCount, 'screenshot pairs');
-
-  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer le travail de l'élève en comparant ses captures d'écran étape par étape avec la référence attendue.
-
-## DÉFI
-**Titre:** ${challengeTitle}
-**Description:** ${challengeDescription}
-
-## CRITÈRES D'ÉVALUATION
-- **Design (0-5):** ${criteriaDesign || 'Respect du design attendu'}
-- **Fonctionnalités (0-5):** ${criteriaFunctionality || 'Présence des éléments interactifs'}
-- **Réalisation (0-5):** ${criteriaCompletion || 'Complétude du résultat'}
-
-## IMAGES À COMPARER
-Tu vas recevoir ${comparisonCount} paires d'images montrant l'évolution du travail:
-- Chaque paire contient: RÉFÉRENCE (attendu) puis ÉLÈVE (obtenu)
-- Analyse les différences à chaque étape
-
-## POINTS À ÉVALUER
-1. **Design**: Les éléments visuels sont-ils similaires? (couleurs, disposition, typographie)
-2. **Fonctionnalités**: L'élève a-t-il effectué les bonnes actions? Les bons éléments sont-ils présents?
-3. **Réalisation**: Le workflow suivi correspond-il à la référence? Le résultat final est-il correct?
-
-## BARÈME
-- 5/5: Parfait, identique à la référence
-- 4/5: Très bien, quelques différences mineures
-- 3/5: Bien, l'essentiel est présent mais des éléments manquent
-- 2/5: Partiel, plusieurs différences notables
-- 1/5: Insuffisant, peu de ressemblance
-- 0/5: Non réalisé ou complètement différent
-
-## RÉPONSE ATTENDUE
-Réponds UNIQUEMENT avec un JSON valide (sans markdown):
-{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif détaillé en français (3-4 phrases). Mentionne les étapes bien réalisées ET les points à améliorer."}`;
-
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-    // Build content array with all comparison pairs
-    const content: (string | { text: string } | { inlineData: { mimeType: string; data: string } })[] = [prompt];
-
-    for (const pair of limitedPairs) {
-      content.push({ text: `\n\n=== ${pair.label} ===` });
-      content.push({ text: `\n--- RÉFÉRENCE ---` });
-      content.push(getImageData(pair.refScreenshot.data));
-      content.push({ text: `\n--- ÉLÈVE ---` });
-      content.push(getImageData(pair.studentScreenshot.data));
-    }
-
-    console.log('Sending vision prompt to Gemini with', comparisonCount * 2, 'images');
-
-    const result = await model.generateContent(content);
-    const response = await result.response;
-    const text = response.text();
-
-    console.log('Gemini raw response:', text.substring(0, 500));
-
-    // Extract JSON from response
-    let jsonStr = text;
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
-    } else {
-      const objectMatch = text.match(/\{[\s\S]*\}/);
-      if (objectMatch) {
-        jsonStr = objectMatch[0];
-      }
-    }
-
-    const reviewResult = JSON.parse(jsonStr) as ReviewResult;
-
-    return {
-      score_design: Math.max(0, Math.min(5, Math.round(reviewResult.score_design))),
-      score_functionality: Math.max(0, Math.min(5, Math.round(reviewResult.score_functionality))),
-      score_completion: Math.max(0, Math.min(5, Math.round(reviewResult.score_completion))),
-      comment: reviewResult.comment || 'Évaluation automatique par IA.',
-    };
-  } catch (error) {
-    console.error('Gemini vision analysis error:', error);
-    return {
-      score_design: 3,
-      score_functionality: 3,
-      score_completion: 3,
-      comment: 'Évaluation automatique - l\'IA n\'a pas pu analyser complètement cette soumission.',
-    };
-  }
+  return reviewResult;
 }
 
 export async function POST(request: NextRequest) {
