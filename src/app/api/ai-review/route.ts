@@ -27,15 +27,29 @@ interface Action {
 }
 
 // Extract screenshots array from data (with timestamp)
-function extractScreenshots(data: unknown): Screenshot[] {
+// Supports both old format (string[]) and new format ({t, data}[])
+function extractScreenshots(data: unknown, actions?: Action[]): Screenshot[] {
   if (!data || typeof data !== 'object') return [];
   const screenshots = (data as Record<string, unknown>).screenshots;
-  if (Array.isArray(screenshots)) {
-    return screenshots.filter((s): s is Screenshot =>
-      typeof s === 'object' && s !== null && 'data' in s && 't' in s
-    );
+  if (!Array.isArray(screenshots)) return [];
+
+  const result: Screenshot[] = [];
+
+  for (let i = 0; i < screenshots.length; i++) {
+    const s = screenshots[i];
+
+    if (typeof s === 'object' && s !== null && 'data' in s && 't' in s) {
+      // New format: {t, data}
+      result.push(s as Screenshot);
+    } else if (typeof s === 'string') {
+      // Old format: just base64 string
+      // Try to match with action timestamp if available, otherwise use index-based timing
+      const timestamp = actions && actions[i] ? actions[i].t : i * 1000;
+      result.push({ t: timestamp, data: s });
+    }
   }
-  return [];
+
+  return result;
 }
 
 // Extract actions array from data
@@ -105,10 +119,13 @@ async function compareScreenshots(
   criteriaFunctionality: string,
   criteriaCompletion: string
 ): Promise<ReviewResult> {
-  const refScreenshots = extractScreenshots(referenceData);
-  const studentScreenshots = extractScreenshots(studentData);
+  // Extract actions first (needed for timestamp matching in old format screenshots)
   const refActions = extractActions(referenceData);
   const studentActions = extractActions(studentData);
+
+  // Extract screenshots (supports both old and new format)
+  const refScreenshots = extractScreenshots(referenceData, refActions);
+  const studentScreenshots = extractScreenshots(studentData, studentActions);
 
   console.log('AI Review - Data:', {
     referenceScreenshotsCount: refScreenshots.length,
