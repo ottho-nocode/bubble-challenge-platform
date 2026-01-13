@@ -14,24 +14,23 @@ interface ReviewResult {
   comment: string;
 }
 
-// Extract actions array from new format (handles both old and new format)
-function extractActions(data: unknown): unknown[] {
-  if (!data) return [];
-  if (Array.isArray(data)) return data; // Old format: direct array
-  if (typeof data === 'object' && 'actions' in (data as Record<string, unknown>)) {
-    return (data as Record<string, unknown>).actions as unknown[] || [];
+// Extract screenshots array from data
+function extractScreenshots(data: unknown): string[] {
+  if (!data || typeof data !== 'object') return [];
+  const screenshots = (data as Record<string, unknown>).screenshots;
+  if (Array.isArray(screenshots)) {
+    return screenshots.filter((s): s is string => typeof s === 'string');
   }
   return [];
 }
 
-// Get screenshot count for context
-function getScreenshotCount(data: unknown): number {
-  if (!data || typeof data !== 'object') return 0;
-  const screenshots = (data as Record<string, unknown>).screenshots;
-  return Array.isArray(screenshots) ? screenshots.length : 0;
+// Get the last screenshot (final result) from data
+function getLastScreenshot(data: unknown): string | null {
+  const screenshots = extractScreenshots(data);
+  return screenshots.length > 0 ? screenshots[screenshots.length - 1] : null;
 }
 
-async function compareActions(
+async function compareScreenshots(
   referenceData: unknown,
   studentData: unknown,
   challengeTitle: string,
@@ -40,66 +39,32 @@ async function compareActions(
   criteriaFunctionality: string,
   criteriaCompletion: string
 ): Promise<ReviewResult> {
-  // Extract just the actions (not screenshots - too large)
-  const referenceActions = extractActions(referenceData);
-  const studentActions = extractActions(studentData);
-  const refScreenshots = getScreenshotCount(referenceData);
-  const studentScreenshots = getScreenshotCount(studentData);
+  // Get the last screenshot (final result) from both reference and student
+  const referenceScreenshot = getLastScreenshot(referenceData);
+  const studentScreenshot = getLastScreenshot(studentData);
 
-  console.log('AI Review - Comparing:', {
-    referenceActionsCount: referenceActions.length,
-    studentActionsCount: studentActions.length,
-    refScreenshots,
-    studentScreenshots
+  const refScreenshots = extractScreenshots(referenceData);
+  const studentScreenshots = extractScreenshots(studentData);
+
+  console.log('AI Review - Comparing screenshots:', {
+    referenceScreenshotsCount: refScreenshots.length,
+    studentScreenshotsCount: studentScreenshots.length,
+    hasReferenceLastScreenshot: !!referenceScreenshot,
+    hasStudentLastScreenshot: !!studentScreenshot,
   });
 
-  // Log actions for debugging
-  console.log('=== AI REVIEW DEBUG ===');
-  console.log('Reference actions count:', referenceActions.length);
-  console.log('Student actions count:', studentActions.length);
-  console.log('Reference actions (first 5):', JSON.stringify(referenceActions.slice(0, 5), null, 2));
-  console.log('Student actions (first 5):', JSON.stringify(studentActions.slice(0, 5), null, 2));
+  // If no screenshots available, return default scores
+  if (!referenceScreenshot || !studentScreenshot) {
+    console.log('Missing screenshots for comparison');
+    return {
+      score_design: 3,
+      score_functionality: 3,
+      score_completion: 3,
+      comment: 'Évaluation automatique - captures d\'écran insuffisantes pour une analyse complète.',
+    };
+  }
 
-  // Summarize actions for clearer analysis
-  const summarizeActions = (actions: unknown[]) => {
-    return actions.map((action: unknown, index: number) => {
-      const a = action as Record<string, unknown>;
-      const summary: Record<string, unknown> = {
-        step: index + 1,
-        type: a.type,
-        time: `${Math.round((a.t as number || 0) / 1000)}s`
-      };
-
-      if (a.type === 'click') {
-        summary.what = a.text || a.element || 'élément';
-        if (a.context) summary.where = a.context;
-        if (a.role) summary.role = a.role;
-      } else if (a.type === 'input') {
-        summary.field = a.label || a.element || 'champ';
-        summary.value = a.value;
-        if (a.context) summary.where = a.context;
-      } else if (a.type === 'drag') {
-        summary.what = a.text || a.element || 'élément';
-        summary.from = `(${a.x1}, ${a.y1})`;
-        summary.to = `(${a.x2}, ${a.y2})`;
-      } else if (a.type === 'navigate') {
-        summary.url = a.url;
-      } else if (a.type === 'keypress') {
-        summary.key = a.key;
-      }
-
-      return summary;
-    });
-  };
-
-  const refSummary = summarizeActions(referenceActions);
-  const studentSummary = summarizeActions(studentActions);
-
-  console.log('Reference summary (first 5):', JSON.stringify(refSummary.slice(0, 5), null, 2));
-  console.log('Student summary (first 5):', JSON.stringify(studentSummary.slice(0, 5), null, 2));
-  console.log('=== END DEBUG ===');
-
-  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer la soumission d'un élève en comparant ses actions avec la solution de référence.
+  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io. Tu dois évaluer le RÉSULTAT FINAL de l'élève en comparant sa capture d'écran avec la référence attendue.
 
 ## DÉFI
 **Titre:** ${challengeTitle}
@@ -110,55 +75,63 @@ async function compareActions(
 - **Fonctionnalités (0-5):** ${criteriaFunctionality}
 - **Réalisation (0-5):** ${criteriaCompletion}
 
-## STATISTIQUES
-| | Référence | Élève |
-|---|---|---|
-| Actions | ${referenceActions.length} | ${studentActions.length} |
-| Captures | ${refScreenshots} | ${studentScreenshots} |
-
-## ACTIONS DE RÉFÉRENCE (ce que l'élève doit faire)
-\`\`\`json
-${JSON.stringify(refSummary, null, 2)}
-\`\`\`
-
-## ACTIONS DE L'ÉLÈVE (ce qu'il a fait)
-\`\`\`json
-${JSON.stringify(studentSummary, null, 2)}
-\`\`\`
-
-## GUIDE D'ANALYSE
-Chaque action contient:
-- **type**: click, input, drag, navigate, keypress, scroll
-- **what/text**: le texte visible de l'élément cliqué (ex: "Enregistrer", "Design", "Ajouter")
-- **where/context**: la section/panneau où se trouve l'élément (ex: "Properties > Appearance")
-- **field/label**: pour les inputs, le nom du champ
-- **value**: la valeur saisie
+## IMAGES À COMPARER
+Tu vas recevoir 2 images:
+1. **IMAGE 1 - RÉFÉRENCE**: Le résultat attendu (ce que l'élève doit reproduire)
+2. **IMAGE 2 - ÉLÈVE**: Le résultat obtenu par l'élève
 
 ## POINTS À ÉVALUER
-1. **Correspondance des actions clés**: L'élève a-t-il cliqué sur les mêmes éléments que la référence (boutons, onglets, options)?
-2. **Séquence logique**: Les actions sont-elles dans un ordre cohérent?
-3. **Valeurs saisies**: Les inputs sont-ils corrects (couleurs, textes, dimensions)?
-4. **Actions manquantes**: Y a-t-il des étapes essentielles non réalisées?
-5. **Actions superflues**: L'élève a-t-il fait beaucoup d'essais-erreurs?
+1. **Design**: Les éléments visuels sont-ils similaires? (couleurs, disposition, typographie, espacement)
+2. **Fonctionnalités**: Les éléments interactifs semblent-ils présents? (boutons, formulaires, menus)
+3. **Réalisation**: Le résultat global correspond-il à la référence? (complétude, fidélité)
 
 ## BARÈME
-- 5/5: Parfait, toutes les étapes sont correctes
-- 4/5: Très bien, quelques petites différences mineures
-- 3/5: Bien, l'essentiel est fait mais il manque des détails
-- 2/5: Partiel, plusieurs étapes manquantes ou incorrectes
-- 1/5: Insuffisant, peu d'étapes correctes
-- 0/5: Non réalisé ou complètement hors sujet
+- 5/5: Parfait, résultat identique à la référence
+- 4/5: Très bien, quelques différences mineures
+- 3/5: Bien, l'essentiel est présent mais des éléments manquent
+- 2/5: Partiel, plusieurs différences notables
+- 1/5: Insuffisant, peu de ressemblance
+- 0/5: Non réalisé ou complètement différent
 
 ## RÉPONSE ATTENDUE
 Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans texte avant/après):
-{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif en français (2-3 phrases). Mentionne ce qui a été bien fait ET ce qui peut être amélioré."}`;
+{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif en français (2-3 phrases). Mentionne ce qui est bien fait ET ce qui peut être amélioré."}`;
 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-    console.log('Sending prompt to Gemini (length:', prompt.length, 'chars)');
+    console.log('Sending vision prompt to Gemini with 2 images');
 
-    const result = await model.generateContent(prompt);
+    // Prepare image parts for Gemini Vision
+    // Screenshots are base64 encoded with data URI prefix
+    const getImageData = (screenshot: string) => {
+      // Remove data URI prefix if present
+      const base64Match = screenshot.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (base64Match) {
+        return {
+          inlineData: {
+            mimeType: `image/${base64Match[1]}`,
+            data: base64Match[2],
+          },
+        };
+      }
+      // Assume it's already base64 without prefix
+      return {
+        inlineData: {
+          mimeType: 'image/png',
+          data: screenshot,
+        },
+      };
+    };
+
+    const result = await model.generateContent([
+      prompt,
+      { text: '\n\n--- IMAGE 1: RÉFÉRENCE (résultat attendu) ---' },
+      getImageData(referenceScreenshot),
+      { text: '\n\n--- IMAGE 2: ÉLÈVE (résultat obtenu) ---' },
+      getImageData(studentScreenshot),
+    ]);
+
     const response = await result.response;
     const text = response.text();
 
@@ -187,7 +160,7 @@ Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans texte avant/après)
       comment: reviewResult.comment || 'Évaluation automatique par IA.',
     };
   } catch (error) {
-    console.error('Gemini analysis error:', error);
+    console.error('Gemini vision analysis error:', error);
     // Return default scores if AI fails
     return {
       score_design: 3,
@@ -281,8 +254,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Compare actions with AI
-    const reviewResult = await compareActions(
+    // Compare screenshots with AI Vision
+    const reviewResult = await compareScreenshots(
       submission.challenges.reference_actions_json,
       submission.actions_json,
       submission.challenges.title,
