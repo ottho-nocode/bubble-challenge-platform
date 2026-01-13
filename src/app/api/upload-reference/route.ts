@@ -79,10 +79,10 @@ export async function POST(request: NextRequest) {
       screenshotsCount: screenshots?.length || 0
     });
 
-    // Verify challenge exists and has AI correction enabled
+    // Verify challenge exists
     const { data: challenge, error: challengeError } = await supabase
       .from('challenges')
-      .select('id, ai_correction_enabled')
+      .select('id')
       .eq('id', challengeId)
       .single();
 
@@ -93,22 +93,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!challenge.ai_correction_enabled) {
-      return NextResponse.json(
-        { error: 'La correction IA n\'est pas activee pour ce defi' },
-        { status: 400 }
-      );
-    }
+    // Build reference data with screenshots for AI comparison
+    // Extract just the base64 data from screenshot objects
+    const screenshotData = (screenshots || []).map((s: { data?: string } | string) => {
+      if (typeof s === 'string') return s;
+      return s.data || s;
+    });
 
-    // Build reference data with actions and screenshots
     const referenceData = {
       actions: actions || [],
-      screenshots: screenshots || [],
+      screenshots: screenshotData,
       metadata: metadata || {},
       recordedAt: new Date().toISOString()
     };
 
-    // Update challenge with reference data
+    console.log('Saving reference data:', {
+      actionsCount: referenceData.actions.length,
+      screenshotsCount: referenceData.screenshots.length,
+    });
+
+    // Update challenge with reference data (screenshots for AI comparison)
     const { error: updateError } = await supabase
       .from('challenges')
       .update({
