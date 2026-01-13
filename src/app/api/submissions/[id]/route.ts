@@ -89,14 +89,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Cette soumission ne vous appartient pas' }, { status: 403 });
     }
 
-    // Delete associated reviews first (if any)
-    const { error: reviewDeleteError } = await supabaseAdmin
+    // Check if submission has been reviewed
+    const { count: reviewCount } = await supabaseAdmin
       .from('reviews')
-      .delete()
+      .select('*', { count: 'exact', head: true })
       .eq('submission_id', id);
 
-    if (reviewDeleteError) {
-      console.log('Error deleting reviews:', reviewDeleteError);
+    if (reviewCount && reviewCount > 0) {
+      return NextResponse.json(
+        { error: 'Impossible de supprimer une soumission déjà corrigée' },
+        { status: 400 }
+      );
     }
 
     // Now delete the submission using admin client

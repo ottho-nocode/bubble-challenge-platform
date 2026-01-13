@@ -188,6 +188,7 @@ export default async function SubmissionsPage({
                   <DeleteSubmissionButton
                     submissionId={submission.id}
                     status={submission.status}
+                    hasReview={!!review}
                   />
                 </div>
               </div>

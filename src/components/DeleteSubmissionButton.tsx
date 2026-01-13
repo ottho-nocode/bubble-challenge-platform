@@ -7,9 +7,14 @@ import { useRouter } from 'next/navigation';
 interface DeleteSubmissionButtonProps {
   submissionId: string;
   status: string;
+  hasReview?: boolean;
 }
 
-export default function DeleteSubmissionButton({ submissionId, status }: DeleteSubmissionButtonProps) {
+export default function DeleteSubmissionButton({ submissionId, status, hasReview }: DeleteSubmissionButtonProps) {
+  // Don't show delete button if submission has been reviewed
+  if (hasReview) {
+    return null;
+  }
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
