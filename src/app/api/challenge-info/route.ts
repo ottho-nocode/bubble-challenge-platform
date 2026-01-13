@@ -61,11 +61,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Determine upload mode
-    // If admin + AI enabled + no reference yet = record reference
-    // Otherwise = normal submission
-    const shouldRecordReference = isAdmin &&
-      challenge.ai_correction_enabled &&
-      !challenge.reference_actions_json;
+    // Admins always record in "reference" mode - video serves as both:
+    // 1. Preview video for students to see the expected result
+    // 2. Reference for AI comparison (if AI correction is enabled)
+    const shouldRecordReference = isAdmin;
 
     return NextResponse.json({
       challenge_id: challenge.id,
