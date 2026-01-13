@@ -17,7 +17,13 @@ export default function EditChallengePage() {
     hasReference: boolean;
     videoUrl: string | null;
   }>({ hasReference: false, videoUrl: null });
+  const [uploadingPreview, setUploadingPreview] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<{
+    hasPreview: boolean;
+    playbackId: string | null;
+  }>({ hasPreview: false, playbackId: null });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewFileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -40,7 +46,7 @@ export default function EditChallengePage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('challenges')
-        .select('*, reference_video_url, reference_actions_json')
+        .select('*, reference_video_url, reference_actions_json, preview_video_playback_id')
         .eq('id', params.id)
         .single();
 
@@ -71,6 +77,11 @@ export default function EditChallengePage() {
       setReferenceStatus({
         hasReference: !!data.reference_actions_json,
         videoUrl: data.reference_video_url || null,
+      });
+
+      setPreviewStatus({
+        hasPreview: !!data.preview_video_playback_id,
+        playbackId: data.preview_video_playback_id || null,
       });
 
       setFetching(false);
@@ -156,6 +167,103 @@ export default function EditChallengePage() {
       setError('Erreur lors de la suppression');
     } finally {
       setUploadingReference(false);
+    }
+  };
+
+  const handlePreviewUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPreview(true);
+    setError('');
+
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        setError('Session expirée');
+        return;
+      }
+
+      // Get Mux upload URL
+      const uploadUrlResponse = await fetch('/api/mux/upload-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          challenge_id: params.id,
+          upload_type: 'preview',
+        }),
+      });
+
+      const uploadUrlData = await uploadUrlResponse.json();
+
+      if (!uploadUrlResponse.ok || !uploadUrlData.uploadUrl) {
+        throw new Error(uploadUrlData.error || 'Erreur lors de la création de l\'upload');
+      }
+
+      // Upload video directly to Mux
+      const uploadResponse = await fetch(uploadUrlData.uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Erreur lors de l\'upload de la vidéo');
+      }
+
+      // Video will be processed by Mux webhook
+      setPreviewStatus({
+        hasPreview: true,
+        playbackId: 'processing', // Will be updated by webhook
+      });
+
+      setError('');
+      alert('Vidéo uploadée ! Elle sera disponible dans quelques instants.');
+
+    } catch (err) {
+      console.error('Preview upload error:', err);
+      setError('Erreur lors de l\'upload de la vidéo de prévisualisation');
+    } finally {
+      setUploadingPreview(false);
+      if (previewFileInputRef.current) {
+        previewFileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeletePreview = async () => {
+    if (!confirm('Supprimer la vidéo de prévisualisation ?')) return;
+
+    setUploadingPreview(true);
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from('challenges')
+        .update({
+          preview_video_asset_id: null,
+          preview_video_playback_id: null,
+        })
+        .eq('id', params.id);
+
+      if (error) throw error;
+
+      setPreviewStatus({
+        hasPreview: false,
+        playbackId: null,
+      });
+    } catch (err) {
+      console.error('Delete preview error:', err);
+      setError('Erreur lors de la suppression');
+    } finally {
+      setUploadingPreview(false);
     }
   };
 
@@ -325,6 +433,91 @@ export default function EditChallengePage() {
 </ul>'
               />
               <p className="text-xs text-[#6a7282] mt-1">Vous pouvez utiliser du HTML pour formater le texte et ajouter des liens</p>
+            </div>
+
+            {/* Preview Video Section */}
+            <div className="border-t border-[#e5e7eb] pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <VideoCamera size={20} className="text-[#4a90d9]" />
+                <label className="block text-sm font-medium text-[#101828]">
+                  Vidéo de prévisualisation
+                </label>
+              </div>
+              <p className="text-sm text-[#6a7282] mb-4">
+                Uploadez une vidéo que les élèves pourront regarder pour comprendre le résultat attendu.
+              </p>
+
+              {previewStatus.hasPreview ? (
+                <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle size={24} className="text-[#22c55e]" weight="fill" />
+                      <div>
+                        <p className="font-medium text-[#166534]">Vidéo de prévisualisation</p>
+                        <p className="text-sm text-[#15803d]">
+                          {previewStatus.playbackId === 'processing'
+                            ? 'Traitement en cours...'
+                            : 'Vidéo disponible'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {previewStatus.playbackId && previewStatus.playbackId !== 'processing' && (
+                        <a
+                          href={`https://stream.mux.com/${previewStatus.playbackId}.m3u8`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 text-sm bg-white border border-[#e5e7eb] rounded-lg hover:bg-[#f9fafb] transition-colors"
+                        >
+                          Voir
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleDeletePreview}
+                        disabled={uploadingPreview}
+                        className="p-1.5 text-[#dc2626] hover:bg-[#fee2e2] rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Trash size={20} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-[#e5e7eb] rounded-xl p-6 text-center">
+                  <input
+                    ref={previewFileInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handlePreviewUpload}
+                    className="hidden"
+                    id="preview-video-input"
+                  />
+                  <Upload size={32} className="mx-auto text-[#9ca3af] mb-3" />
+                  <p className="text-sm text-[#6a7282] mb-3">
+                    Glissez une vidéo ou cliquez pour uploader
+                  </p>
+                  <label
+                    htmlFor="preview-video-input"
+                    className={`inline-flex items-center gap-2 px-4 py-2 bg-[#4a90d9] text-white rounded-lg cursor-pointer hover:bg-[#3a7bc8] transition-colors ${uploadingPreview ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {uploadingPreview ? (
+                      <>
+                        <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+                        Upload en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} />
+                        Choisir une vidéo
+                      </>
+                    )}
+                  </label>
+                  <p className="text-xs text-[#9ca3af] mt-3">
+                    Formats acceptés: MP4, WebM, MOV
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

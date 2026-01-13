@@ -163,19 +163,19 @@ export default async function ChallengePage({
             </div>
           </div>
 
-          {/* Reference Video */}
-          {challenge.reference_video_playback_id && (
+          {/* Preview Video */}
+          {challenge.preview_video_playback_id && (
             <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] p-6">
               <h3 className="font-semibold text-[#101828] mb-3 flex items-center gap-2">
                 <span>🎬</span>
-                Vidéo de référence
+                Vidéo de démonstration
               </h3>
               <p className="text-sm text-[#6a7282] mb-4">
                 Regardez cette vidéo pour comprendre le résultat attendu.
               </p>
               <MuxVideoPlayer
-                playbackId={challenge.reference_video_playback_id}
-                title={`Reference - ${challenge.title}`}
+                playbackId={challenge.preview_video_playback_id}
+                title={`Démonstration - ${challenge.title}`}
               />
             </div>
           )}

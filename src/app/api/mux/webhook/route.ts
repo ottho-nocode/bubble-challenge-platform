@@ -80,8 +80,23 @@ export async function POST(request: NextRequest) {
           sourceUploadId,
         });
 
-        if (upload_type === 'reference') {
-          // Update challenge with reference video
+        if (upload_type === 'preview') {
+          // Update challenge with preview video (for students to watch)
+          const { error } = await supabase
+            .from('challenges')
+            .update({
+              preview_video_asset_id: assetId,
+              preview_video_playback_id: playbackId,
+            })
+            .eq('id', challenge_id);
+
+          if (error) {
+            console.error('Error updating challenge with preview video:', error);
+          } else {
+            console.log('Preview video saved for challenge:', challenge_id);
+          }
+        } else if (upload_type === 'reference') {
+          // Update challenge with reference video (for AI comparison)
           const { error } = await supabase
             .from('challenges')
             .update({
