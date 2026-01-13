@@ -41,48 +41,51 @@ export default function EditChallengePage() {
 
   useEffect(() => {
     const fetchChallenge = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('challenges')
-        .select('*, reference_video_url, reference_actions_json, preview_video_playback_id')
-        .eq('id', params.id)
-        .single();
+      try {
+        // Use admin API route to fetch challenge (bypasses RLS)
+        const response = await fetch(`/api/admin/challenges/${params.id}`);
+        const result = await response.json();
 
-      console.log('Fetched challenge:', data);
-      console.log('ai_correction_enabled from DB:', data?.ai_correction_enabled);
+        if (!response.ok || !result.data) {
+          router.push('/admin/challenges');
+          return;
+        }
 
-      if (error || !data) {
+        const data = result.data;
+        console.log('Fetched challenge:', data);
+        console.log('ai_correction_enabled from DB:', data?.ai_correction_enabled);
+
+        setFormData({
+          title: data.title,
+          description: data.description,
+          time_limit: data.time_limit,
+          difficulty: data.difficulty,
+          category: data.category || 'both',
+          points_base: data.points_base,
+          criteria_design: data.criteria_design,
+          criteria_functionality: data.criteria_functionality,
+          criteria_completion: data.criteria_completion,
+          result_image_url: data.result_image_url || '',
+          resources: data.resources || '',
+          is_active: data.is_active,
+          ai_correction_enabled: data.ai_correction_enabled === true,
+        });
+
+        setReferenceStatus({
+          hasReference: !!data.reference_actions_json,
+          videoUrl: data.reference_video_url || null,
+        });
+
+        setPreviewStatus({
+          hasPreview: !!data.preview_video_playback_id,
+          playbackId: data.preview_video_playback_id || null,
+        });
+
+        setFetching(false);
+      } catch (err) {
+        console.error('Fetch error:', err);
         router.push('/admin/challenges');
-        return;
       }
-
-      setFormData({
-        title: data.title,
-        description: data.description,
-        time_limit: data.time_limit,
-        difficulty: data.difficulty,
-        category: data.category || 'both',
-        points_base: data.points_base,
-        criteria_design: data.criteria_design,
-        criteria_functionality: data.criteria_functionality,
-        criteria_completion: data.criteria_completion,
-        result_image_url: data.result_image_url || '',
-        resources: data.resources || '',
-        is_active: data.is_active,
-        ai_correction_enabled: data.ai_correction_enabled || false,
-      });
-
-      setReferenceStatus({
-        hasReference: !!data.reference_actions_json,
-        videoUrl: data.reference_video_url || null,
-      });
-
-      setPreviewStatus({
-        hasPreview: !!data.preview_video_playback_id,
-        playbackId: data.preview_video_playback_id || null,
-      });
-
-      setFetching(false);
     };
 
     fetchChallenge();
@@ -176,23 +179,29 @@ export default function EditChallengePage() {
     console.log('Saving formData:', formData);
     console.log('ai_correction_enabled value:', formData.ai_correction_enabled);
 
-    const supabase = createClient();
+    try {
+      // Use admin API route to update challenge (bypasses RLS)
+      const response = await fetch(`/api/admin/challenges/${params.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    const { data, error } = await supabase
-      .from('challenges')
-      .update(formData)
-      .eq('id', params.id)
-      .select();
+      const result = await response.json();
+      console.log('Update response:', result);
 
-    console.log('Update response:', { data, error });
+      if (!response.ok) {
+        setError(result.error || 'Erreur lors de la mise à jour');
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
+      router.push('/admin/challenges');
+    } catch (err) {
+      console.error('Update error:', err);
+      setError('Erreur lors de la mise à jour');
       setLoading(false);
-      return;
     }
-
-    router.push('/admin/challenges');
   };
 
   if (fetching) {
