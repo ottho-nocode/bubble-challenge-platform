@@ -13,6 +13,7 @@ export default function EditChallengePage() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [uploadingReference, setUploadingReference] = useState(false);
+  const [deletingPreview, setDeletingPreview] = useState(false);
   const [referenceStatus, setReferenceStatus] = useState<{
     hasReference: boolean;
     videoUrl: string | null;
@@ -168,6 +169,41 @@ export default function EditChallengePage() {
       setError('Erreur lors de la suppression');
     } finally {
       setUploadingReference(false);
+    }
+  };
+
+  const handleDeletePreviewVideo = async () => {
+    if (!confirm('Supprimer la vidéo de référence ? Les élèves ne verront plus la prévisualisation.')) return;
+
+    setDeletingPreview(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/admin/challenges/${params.id}/preview`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de la suppression');
+      }
+
+      setPreviewStatus({
+        hasPreview: false,
+        playbackId: null,
+      });
+
+      // Also clear reference data since preview serves as reference
+      setReferenceStatus({
+        hasReference: false,
+        videoUrl: null,
+      });
+    } catch (err) {
+      console.error('Delete preview error:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    } finally {
+      setDeletingPreview(false);
     }
   };
 
@@ -371,16 +407,31 @@ export default function EditChallengePage() {
                         </p>
                       </div>
                     </div>
-                    {previewStatus.playbackId && previewStatus.playbackId !== 'processing' && (
-                      <a
-                        href={`https://stream.mux.com/${previewStatus.playbackId}.m3u8`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 text-sm bg-white border border-[#e5e7eb] rounded-lg hover:bg-[#f9fafb] transition-colors"
+                    <div className="flex items-center gap-2">
+                      {previewStatus.playbackId && previewStatus.playbackId !== 'processing' && (
+                        <a
+                          href={`https://stream.mux.com/${previewStatus.playbackId}.m3u8`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 text-sm bg-white border border-[#e5e7eb] rounded-lg hover:bg-[#f9fafb] transition-colors"
+                        >
+                          Voir
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleDeletePreviewVideo}
+                        disabled={deletingPreview}
+                        className="p-1.5 text-[#dc2626] hover:bg-[#fee2e2] rounded-lg transition-colors disabled:opacity-50"
+                        title="Supprimer la vidéo"
                       >
-                        Voir la vidéo
-                      </a>
-                    )}
+                        {deletingPreview ? (
+                          <span className="animate-spin inline-block w-5 h-5 border-2 border-[#dc2626] border-t-transparent rounded-full"></span>
+                        ) : (
+                          <Trash size={20} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
