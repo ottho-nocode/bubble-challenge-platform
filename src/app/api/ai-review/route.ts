@@ -188,82 +188,109 @@ Limite-toi à 5-7 checkpoints maximum, les plus importants.`;
   }
 }
 
-// STEP 2: Evaluate student work against checkpoints
-async function evaluateStudent(
+// Direct comparison: send both reference and student screenshots to AI
+async function compareDirectly(
+  refScreenshots: Screenshot[],
+  refActions: Action[],
   studentScreenshots: Screenshot[],
   studentActions: Action[],
-  checkpoints: string[],
   challengeTitle: string,
+  challengeDescription: string,
   criteriaDesign: string,
   criteriaFunctionality: string,
   criteriaCompletion: string
 ): Promise<ReviewResult> {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-  // Select key student screenshots
-  const keyScreenshots: Screenshot[] = [];
+  // Select key reference screenshots (final + after clicks)
+  const refKeyScreenshots: Screenshot[] = [];
+  const refClickActions = refActions.filter(a => a.type === 'click');
+
+  for (const action of refClickActions.slice(0, 3)) {
+    const screenshot = findScreenshotForAction(refScreenshots, action.t);
+    if (screenshot && !refKeyScreenshots.includes(screenshot)) {
+      refKeyScreenshots.push(screenshot);
+    }
+  }
+  if (refScreenshots.length > 0) {
+    const lastRef = refScreenshots[refScreenshots.length - 1];
+    if (!refKeyScreenshots.includes(lastRef)) {
+      refKeyScreenshots.push(lastRef);
+    }
+  }
+
+  // Select key student screenshots (final + after clicks)
+  const studentKeyScreenshots: Screenshot[] = [];
   const studentClickActions = studentActions.filter(a => a.type === 'click');
 
-  for (const action of studentClickActions.slice(0, 8)) {
+  for (const action of studentClickActions.slice(0, 3)) {
     const screenshot = findScreenshotForAction(studentScreenshots, action.t);
-    if (screenshot && !keyScreenshots.includes(screenshot)) {
-      keyScreenshots.push(screenshot);
+    if (screenshot && !studentKeyScreenshots.includes(screenshot)) {
+      studentKeyScreenshots.push(screenshot);
     }
   }
-
-  // Always include final screenshot
   if (studentScreenshots.length > 0) {
-    const lastScreenshot = studentScreenshots[studentScreenshots.length - 1];
-    if (!keyScreenshots.includes(lastScreenshot)) {
-      keyScreenshots.push(lastScreenshot);
+    const lastStudent = studentScreenshots[studentScreenshots.length - 1];
+    if (!studentKeyScreenshots.includes(lastStudent)) {
+      studentKeyScreenshots.push(lastStudent);
     }
   }
 
-  const checkpointsList = checkpoints.map((c, i) => `${i + 1}. ${c}`).join('\n');
-
-  const prompt = `Tu es un correcteur expert pour une plateforme d'apprentissage Bubble.io.
+  const prompt = `Tu es un correcteur pour une plateforme d'apprentissage Bubble.io. Tu dois COMPARER OBJECTIVEMENT le travail d'un élève avec une solution de référence.
 
 ## DÉFI: ${challengeTitle}
+${challengeDescription}
 
-## CHECKPOINTS À VÉRIFIER
-Voici les points de contrôle identifiés dans la solution de référence:
-${checkpointsList}
+## MÉTHODE DE NOTATION
+Tu vas recevoir des captures d'écran de la RÉFÉRENCE (solution correcte) puis des captures de l'ÉLÈVE.
+Ta tâche est de vérifier si le résultat de l'élève CORRESPOND à la référence.
 
-## CRITÈRES D'ÉVALUATION
-- **Design (0-5):** ${criteriaDesign || 'Respect du design attendu'}
-- **Fonctionnalités (0-5):** ${criteriaFunctionality || 'Présence des éléments interactifs'}
-- **Réalisation (0-5):** ${criteriaCompletion || 'Complétude du résultat'}
+## CRITÈRES
+- **Design (0-5):** ${criteriaDesign || 'Le résultat visuel correspond-il à la référence?'}
+- **Fonctionnalités (0-5):** ${criteriaFunctionality || 'Les mêmes éléments/interactions sont-ils présents?'}
+- **Réalisation (0-5):** ${criteriaCompletion || 'Le résultat final est-il identique ou équivalent?'}
 
-## TRAVAIL DE L'ÉLÈVE
-Tu vas recevoir ${keyScreenshots.length} captures d'écran du travail de l'élève.
-Pour chaque checkpoint, vérifie s'il est atteint ou non.
+## BARÈME OBJECTIF
+- 5/5: Résultat IDENTIQUE ou quasi-identique à la référence
+- 4/5: Résultat très proche, différences cosmétiques mineures (couleurs légèrement différentes, etc.)
+- 3/5: Résultat similaire mais avec des différences notables
+- 2/5: Résultat partiellement correct, éléments manquants
+- 1/5: Résultat très différent de la référence
+- 0/5: Rien de comparable à la référence
 
-## BARÈME
-- 5/5: Tous les checkpoints atteints parfaitement
-- 4/5: Presque tous les checkpoints atteints, différences mineures
-- 3/5: La majorité des checkpoints atteints
-- 2/5: Seulement quelques checkpoints atteints
-- 1/5: Très peu de checkpoints atteints
-- 0/5: Aucun checkpoint atteint
+## IMPORTANT
+- Ne fais PAS de jugements subjectifs sur la "qualité" du design
+- Compare UNIQUEMENT avec la référence fournie
+- Si l'élève a fait exactement la même chose que la référence = 5/5
+- Les captures de l'élève sont prises à des moments similaires (après chaque clic)
 
-## RÉPONSE ATTENDUE
-Réponds UNIQUEMENT avec un JSON valide (sans markdown):
-{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Commentaire constructif en français (3-4 phrases). Liste les checkpoints atteints ✓ et ceux manqués ✗."}`;
+## RÉPONSE
+Réponds UNIQUEMENT avec un JSON valide:
+{"score_design": X, "score_functionality": X, "score_completion": X, "comment": "Comparaison objective en 2-3 phrases. Indique ce qui correspond ✓ et ce qui diffère ✗ par rapport à la référence."}`;
 
   const content: (string | { text: string } | { inlineData: { mimeType: string; data: string } })[] = [prompt];
 
-  for (let i = 0; i < keyScreenshots.length; i++) {
-    content.push({ text: `\n\n=== Capture ${i + 1}/${keyScreenshots.length} ===` });
-    content.push(getImageData(keyScreenshots[i].data));
+  // Add reference screenshots
+  content.push({ text: `\n\n========== RÉFÉRENCE (${refKeyScreenshots.length} captures) ==========` });
+  for (let i = 0; i < refKeyScreenshots.length; i++) {
+    content.push({ text: `\n--- Référence ${i + 1}/${refKeyScreenshots.length} ---` });
+    content.push(getImageData(refKeyScreenshots[i].data));
   }
 
-  console.log('Step 2: Evaluating student with', keyScreenshots.length, 'screenshots against', checkpoints.length, 'checkpoints');
+  // Add student screenshots
+  content.push({ text: `\n\n========== TRAVAIL DE L'ÉLÈVE (${studentKeyScreenshots.length} captures) ==========` });
+  for (let i = 0; i < studentKeyScreenshots.length; i++) {
+    content.push({ text: `\n--- Élève ${i + 1}/${studentKeyScreenshots.length} ---` });
+    content.push(getImageData(studentKeyScreenshots[i].data));
+  }
+
+  console.log('Direct comparison:', refKeyScreenshots.length, 'ref screenshots vs', studentKeyScreenshots.length, 'student screenshots');
 
   try {
     const result = await model.generateContent(content);
     const text = result.response.text();
 
-    console.log('Student evaluation raw:', text.substring(0, 500));
+    console.log('Comparison result raw:', text.substring(0, 500));
 
     // Extract JSON
     let jsonStr = text;
@@ -286,7 +313,7 @@ Réponds UNIQUEMENT avec un JSON valide (sans markdown):
       comment: reviewResult.comment || 'Évaluation automatique par IA.',
     };
   } catch (error) {
-    console.error('Student evaluation error:', error);
+    console.error('Comparison error:', error);
     return {
       score_design: 3,
       score_functionality: 3,
@@ -331,20 +358,14 @@ async function compareScreenshots(
     };
   }
 
-  // STEP 1: Analyze reference to identify checkpoints
-  const checkpoints = await analyzeReference(
+  // Direct comparison: send both reference and student screenshots to AI
+  const reviewResult = await compareDirectly(
     refScreenshots,
     refActions,
-    challengeTitle,
-    challengeDescription
-  );
-
-  // STEP 2: Evaluate student against checkpoints
-  const reviewResult = await evaluateStudent(
     studentScreenshots,
     studentActions,
-    checkpoints,
     challengeTitle,
+    challengeDescription,
     criteriaDesign,
     criteriaFunctionality,
     criteriaCompletion
