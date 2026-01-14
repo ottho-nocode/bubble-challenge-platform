@@ -3,7 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Trash, VideoCamera, CheckCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Trash, VideoCamera, CheckCircle, Image, Play, CaretDown, CaretUp, Robot } from '@phosphor-icons/react';
+
+interface Screenshot {
+  t: number;
+  data: string;
+}
+
+interface Action {
+  t: number;
+  type: string;
+  text?: string;
+  element?: string;
+}
+
+interface ReferenceData {
+  screenshots: (Screenshot | string)[];
+  actions: Action[];
+  metadata?: Record<string, unknown>;
+}
 
 export default function EditChallengePage() {
   const router = useRouter();
@@ -16,6 +34,11 @@ export default function EditChallengePage() {
     hasPreview: boolean;
     playbackId: string | null;
   }>({ hasPreview: false, playbackId: null });
+
+  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null);
+  const [showReferenceDetails, setShowReferenceDetails] = useState(false);
+  const [analyzingReference, setAnalyzingReference] = useState(false);
+  const [referenceCheckpoints, setReferenceCheckpoints] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -70,6 +93,22 @@ export default function EditChallengePage() {
           playbackId: data.preview_video_playback_id || null,
         });
 
+        // Parse reference actions JSON if available
+        console.log('reference_actions_json:', data.reference_actions_json);
+        if (data.reference_actions_json) {
+          try {
+            const refData = typeof data.reference_actions_json === 'string'
+              ? JSON.parse(data.reference_actions_json)
+              : data.reference_actions_json;
+            console.log('Parsed refData:', refData);
+            setReferenceData(refData as ReferenceData);
+          } catch (e) {
+            console.error('Failed to parse reference_actions_json:', e);
+          }
+        } else {
+          console.log('No reference_actions_json available');
+        }
+
         setFetching(false);
       } catch (err) {
         console.error('Fetch error:', err);
@@ -79,6 +118,46 @@ export default function EditChallengePage() {
 
     fetchChallenge();
   }, [params.id, router]);
+
+  const handleAnalyzeReference = async () => {
+    setAnalyzingReference(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/admin/challenges/${params.id}/analyze-reference`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'analyse');
+      }
+
+      setReferenceCheckpoints(result.checkpoints || []);
+    } catch (err) {
+      console.error('Analyze reference error:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'analyse');
+    } finally {
+      setAnalyzingReference(false);
+    }
+  };
+
+  // Helper to extract screenshot data (supports old string format and new {t, data} format)
+  const getScreenshotSrc = (screenshot: Screenshot | string): string => {
+    if (typeof screenshot === 'string') {
+      return screenshot.startsWith('data:') ? screenshot : `data:image/png;base64,${screenshot}`;
+    }
+    return screenshot.data.startsWith('data:') ? screenshot.data : `data:image/png;base64,${screenshot.data}`;
+  };
+
+  // Helper to format timestamp
+  const formatTime = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const handleDeletePreviewVideo = async () => {
     if (!confirm('Supprimer la vidéo de référence ? Les élèves ne verront plus la prévisualisation.')) return;
@@ -347,6 +426,158 @@ export default function EditChallengePage() {
                       </p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Reference Data Details */}
+              {previewStatus.hasPreview && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowReferenceDetails(!showReferenceDetails)}
+                    className="flex items-center gap-2 text-sm font-medium text-[#4a90d9] hover:text-[#3a7cc0] transition-colors"
+                  >
+                    {showReferenceDetails ? <CaretUp size={16} /> : <CaretDown size={16} />}
+                    {showReferenceDetails ? 'Masquer' : 'Voir'} les détails de la référence
+                    <span className="text-[#6a7282] font-normal">
+                      ({referenceData?.screenshots?.length || 0} captures, {referenceData?.actions?.length || 0} actions)
+                    </span>
+                  </button>
+
+                  {showReferenceDetails && (
+                    <div className="mt-4 space-y-6">
+                      {/* AI Analysis Button */}
+                      <div className="bg-[#faf5ff] border border-[#e9d5ff] rounded-xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Robot size={24} className="text-[#6d28d9]" />
+                            <div>
+                              <p className="font-medium text-[#581c87]">Analyse IA de la référence</p>
+                              <p className="text-sm text-[#7c3aed]">
+                                Voir les checkpoints identifiés par l&apos;IA
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAnalyzeReference}
+                            disabled={analyzingReference}
+                            className="px-4 py-2 bg-[#6d28d9] text-white rounded-lg hover:bg-[#5b21b6] transition-colors disabled:opacity-50 flex items-center gap-2"
+                          >
+                            {analyzingReference ? (
+                              <>
+                                <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                                Analyse...
+                              </>
+                            ) : (
+                              <>
+                                <Play size={16} weight="fill" />
+                                Analyser
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {referenceCheckpoints.length > 0 && (
+                          <div className="mt-4 bg-white rounded-lg p-4">
+                            <p className="font-medium text-[#101828] mb-2">Checkpoints identifiés:</p>
+                            <ul className="space-y-2">
+                              {referenceCheckpoints.map((checkpoint, index) => (
+                                <li key={index} className="flex items-start gap-2 text-sm text-[#6a7282]">
+                                  <CheckCircle size={18} className="text-[#22c55e] shrink-0 mt-0.5" weight="fill" />
+                                  {checkpoint}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Screenshots */}
+                      {referenceData?.screenshots && referenceData.screenshots.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Image size={18} className="text-[#6a7282]" />
+                            <p className="font-medium text-[#101828]">
+                              Captures d&apos;écran ({referenceData.screenshots.length})
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            {referenceData.screenshots.map((screenshot, index) => {
+                              const isNewFormat = typeof screenshot === 'object' && screenshot !== null;
+                              const timestamp = isNewFormat ? (screenshot as Screenshot).t : index * 1000;
+                              return (
+                                <div key={index} className="relative group">
+                                  <img
+                                    src={getScreenshotSrc(screenshot)}
+                                    alt={`Capture ${index + 1}`}
+                                    className="w-full h-auto rounded-lg border border-[#e5e7eb] object-cover aspect-video"
+                                  />
+                                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1 rounded-b-lg">
+                                    #{index + 1} - {formatTime(timestamp)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      {referenceData?.actions && referenceData.actions.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Play size={18} className="text-[#6a7282]" />
+                            <p className="font-medium text-[#101828]">
+                              Actions enregistrées ({referenceData.actions.length})
+                            </p>
+                          </div>
+                          <div className="bg-[#f9fafb] rounded-xl p-4 max-h-64 overflow-y-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="text-left text-[#6a7282]">
+                                  <th className="pb-2 font-medium">Temps</th>
+                                  <th className="pb-2 font-medium">Type</th>
+                                  <th className="pb-2 font-medium">Détails</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[#e5e7eb]">
+                                {referenceData.actions.map((action, index) => (
+                                  <tr key={index} className="text-[#101828]">
+                                    <td className="py-2 text-[#6a7282]">{formatTime(action.t)}</td>
+                                    <td className="py-2">
+                                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                                        action.type === 'click' ? 'bg-blue-100 text-blue-700' :
+                                        action.type === 'input' ? 'bg-green-100 text-green-700' :
+                                        action.type === 'scroll' ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-gray-100 text-gray-700'
+                                      }`}>
+                                        {action.type}
+                                      </span>
+                                    </td>
+                                    <td className="py-2 text-[#6a7282] truncate max-w-[200px]">
+                                      {action.element || action.text || '-'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* No data warning */}
+                      {(!referenceData?.screenshots || referenceData.screenshots.length === 0) && (
+                        <div className="bg-[#fef3c7] border border-[#fcd34d] rounded-xl p-4">
+                          <p className="text-[#92400e] font-medium">Aucune capture d&apos;écran</p>
+                          <p className="text-sm text-[#a16207] mt-1">
+                            La vidéo de référence a été enregistrée avec une ancienne version de l&apos;extension.
+                            Ré-enregistrez la solution avec la dernière version pour capturer les screenshots à chaque action.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
