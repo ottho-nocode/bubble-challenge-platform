@@ -13,42 +13,91 @@ const difficultyLabels = {
   hard: 'Difficile',
 };
 
-export default async function ChallengesPage() {
-  const supabase = await createClient();
+const categoryLabels = {
+  web: 'Web',
+  mobile: 'Mobile',
+  both: 'Web & Mobile',
+};
 
-  const { data: challenges } = await supabase
+const categoryColors = {
+  web: 'bg-[#dbeafe] text-[#1e40af]',
+  mobile: 'bg-[#f3e8ff] text-[#6b21a8]',
+  both: 'bg-[#e0e7ff] text-[#3730a3]',
+};
+
+export default async function ChallengesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ format?: string }>;
+}) {
+  const supabase = await createClient();
+  const params = await searchParams;
+  const formatFilter = params.format || 'all';
+
+  let query = supabase
     .from('challenges')
     .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+    .eq('is_active', true);
+
+  // Apply format filter
+  if (formatFilter === 'web') {
+    query = query.in('category', ['web', 'both']);
+  } else if (formatFilter === 'mobile') {
+    query = query.in('category', ['mobile', 'both']);
+  }
+
+  const { data: challenges } = await query.order('created_at', { ascending: false });
 
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-[#101828]">Défis disponibles</h1>
           <p className="text-[#6a7282] mt-1">
             Choisissez un exercice pour monter en compétence sur Bubble.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#9ca3af]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input
-              type="text"
-              placeholder="Rechercher un défi..."
-              className="w-80 pl-11 pr-4 py-3 bg-white border border-[#e5e7eb] rounded-xl text-sm focus:ring-2 focus:ring-[#4a90d9] focus:border-transparent outline-none"
-            />
-          </div>
-          <button className="w-12 h-12 bg-white border border-[#e5e7eb] rounded-xl flex items-center justify-center hover:bg-[#f9fafb] transition-colors">
-            <svg className="w-4 h-4 text-[#6a7282]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-            </svg>
-          </button>
-        </div>
+      </div>
+
+      {/* Format Filter Tabs */}
+      <div className="flex items-center gap-2 mb-6">
+        <Link
+          href="/challenges"
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            formatFilter === 'all'
+              ? 'bg-[#001354] text-white'
+              : 'bg-white text-[#6a7282] hover:bg-[#f3f4f6] border border-[#e5e7eb]'
+          }`}
+        >
+          Tous
+        </Link>
+        <Link
+          href="/challenges?format=web"
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+            formatFilter === 'web'
+              ? 'bg-[#001354] text-white'
+              : 'bg-white text-[#6a7282] hover:bg-[#f3f4f6] border border-[#e5e7eb]'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          Web
+        </Link>
+        <Link
+          href="/challenges?format=mobile"
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+            formatFilter === 'mobile'
+              ? 'bg-[#001354] text-white'
+              : 'bg-white text-[#6a7282] hover:bg-[#f3f4f6] border border-[#e5e7eb]'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+          Mobile
+        </Link>
       </div>
 
       {/* Challenges List */}
@@ -88,23 +137,11 @@ export default async function ChallengesPage() {
                   </div>
                 </div>
 
-                {/* Tags */}
+                {/* Category Tag */}
                 <div className="flex flex-wrap gap-2">
-                  {challenge.criteria_design && (
-                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                      Design propre
-                    </span>
-                  )}
-                  {challenge.criteria_functionality && (
-                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                      Fonctionnalités
-                    </span>
-                  )}
-                  {challenge.criteria_completion && (
-                    <span className="px-3 py-1 bg-[#f3f4f6] text-[#4b5563] rounded-lg text-xs">
-                      Réalisation complète
-                    </span>
-                  )}
+                  <span className={`px-3 py-1 rounded-lg text-xs font-medium ${categoryColors[challenge.category as keyof typeof categoryColors] || categoryColors.both}`}>
+                    {categoryLabels[challenge.category as keyof typeof categoryLabels] || 'Web & Mobile'}
+                  </span>
                 </div>
               </div>
 
