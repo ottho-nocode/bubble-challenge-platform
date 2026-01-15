@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import crypto from 'crypto';
 
 type ActivityItem = {
   id: string;
@@ -121,25 +122,39 @@ export default async function DashboardPage() {
     review_received: 'bg-[#f0b100]',
   };
 
+  // Generate gravatar URL from email
+  const emailHash = user?.email
+    ? crypto.createHash('md5').update(user.email.toLowerCase().trim()).digest('hex')
+    : '';
+  const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=identicon&s=80`;
+
+  // Get first name from username (before any space or use full username)
+  const firstName = profile?.username?.split(' ')[0] || profile?.username || 'Utilisateur';
+
   return (
     <div className="p-8">
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[#101828]">
-            Bonjour, {profile?.username || 'Alex'}
+            Bonjour, {firstName}
           </h1>
           <p className="text-[#6a7282] mt-1">
             Voici un aperçu de votre progression sur Bubble.
           </p>
         </div>
-        <div className="text-sm text-[#6a7282]">
-          Dernière connexion: Aujourd&apos;hui, {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-[#101828]">{profile?.username || 'Utilisateur'}</span>
+          <img
+            src={gravatarUrl}
+            alt={profile?.username || 'Avatar'}
+            className="w-10 h-10 rounded-full border-2 border-[#e5e7eb]"
+          />
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] flex items-center gap-4">
           <div className="w-12 h-12 bg-[rgba(240,177,0,0.1)] rounded-xl flex items-center justify-center">
             <svg className="w-6 h-6 text-[#f0b100]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
