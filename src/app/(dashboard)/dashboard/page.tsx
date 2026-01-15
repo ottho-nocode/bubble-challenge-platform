@@ -179,17 +179,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] flex items-center gap-4">
-          <div className="w-12 h-12 bg-[rgba(168,85,247,0.1)] rounded-xl flex items-center justify-center">
-            <svg className="w-6 h-6 text-[#a855f7]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm text-[#6a7282]">Série en cours</p>
-            <p className="text-2xl font-bold text-[#101828]">3 jours</p>
-          </div>
-        </div>
       </div>
 
       {/* Main Content Grid */}
@@ -301,25 +290,6 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Weekly Goal */}
-          <div className="bg-gradient-to-br from-[#f59e0b] to-[#ea580c] rounded-2xl p-6 text-white">
-            <div className="flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"/>
-              </svg>
-              <h3 className="font-semibold">Objectif Hebdo</h3>
-            </div>
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-white/80">Progression</span>
-              <span className="font-medium">3/5 défis</span>
-            </div>
-            <div className="w-full bg-white/20 rounded-full h-2 mb-4">
-              <div className="bg-white rounded-full h-2 w-3/5"></div>
-            </div>
-            <p className="text-sm text-white/80">
-              Complétez encore 2 défis pour gagner le badge &quot;Régularité&quot;.
-            </p>
-          </div>
         </div>
       </div>
     </div>
